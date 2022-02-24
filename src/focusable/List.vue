@@ -1,9 +1,11 @@
 <template>
+<div>
+  <h3 v-if="title">{{ title }}</h3>
   <div
     class="list"
-    v-bind:class="{ focus: isFocused, vertical: orientation === 'VERTICAL' }"
+    :class="{ focus: isFocused, vertical: orientation === 'VERTICAL' }"
     ref="list"
-    v-bind:style="style"
+    :style="style"
   >
     <div
       class="child"
@@ -16,11 +18,12 @@
         v-bind="item"
         :id="`child${item.id || index}`"
         :isFocused="isFocused && index === focusedIndex"
-        v-bind:class="{ disabled: disabledIndex.includes(index) }"
+        :class="{ disabled: disabledIndex.includes(index) }"
         :disabled="item.disabled || disabledIndex.includes(index)"
       />
     </div>
   </div>
+</div>
 </template>
 
 <script>
@@ -29,9 +32,17 @@ import { enableNavigation, disableNavigation, focusHandler } from "@/event-bus";
 export default {
   name: "focusableList",
   props: {
+    onChildChange:{
+      type: Function,
+      required: false,
+    },
     child: {
       type: Object, //Child component (eg: card, button)
       required: true,
+    },
+    title:{
+      type: String,
+      require: false,
     },
     items: {
       //Array to be passed to child
@@ -73,15 +84,12 @@ export default {
     return {
       focusedIndex: -1,
       scrollAmount: 0,
+      ready: false,
     };
   },
   computed: {
     style() {
-      return {
-        transform: `translate${this.orientation === "VERTICAL" ? "Y" : "X"}(${
-          this.scrollAmount
-        }px)`,
-      };
+      return (this.orientation === "VERTICAL" ? "top" : "left")+`: ${this.scrollAmount}px`;
     },
   },
   methods: {
@@ -153,6 +161,7 @@ export default {
             newIndex: validIndex,
             item: this.items[validIndex],
           });
+          this.onChildChangeFunction(this.focusedIndex,validIndex,this.items[validIndex]);
           break;
         }
         i++;
@@ -170,6 +179,7 @@ export default {
             newIndex: validIndex,
             item: this.items[validIndex],
           });
+          this.onChildChangeFunction(this.focusedIndex,validIndex,this.items[validIndex]);
           break;
         }
         i--;
@@ -183,6 +193,15 @@ export default {
         this.focusedIndex = this.getValidNextIndex();
       }
     },
+    onChildChangeFunction(prevIndex,newIndex,item){
+      if(this.ready && this.onChildChange){
+        this.onChildChange({
+          prevIndex: prevIndex,
+          newIndex: newIndex,
+          item: item,
+        });
+      }
+    },
     updateScrollValue() {
       if (this.shouldScroll && this.$refs.childItem) {
         this.scrollAmount =
@@ -191,6 +210,24 @@ export default {
             this.orientation
           ) * this.focusedIndex;
       }
+      // hide Elements in the dom
+      setTimeout(()=>{
+        this.$refs.childItem.forEach((el)=>{
+          if(!this.elementInViewport(el)){
+            el.classList.add('hide');
+          } else{
+            el.classList.remove('hide');
+            const childs = el.children[0].querySelectorAll('.child');
+            if(childs.length > 0){
+              childs.forEach((el)=>{
+                if(this.elementInViewport(el)){
+                  el.classList.remove('hide');
+                }
+              });
+            }
+          }
+        })
+      },150)
     },
     resetFocus({ force }) {
       if (force || !this.isFocused) {
@@ -212,6 +249,25 @@ export default {
         }
       }
     },
+    elementInViewport(el) {
+      var width = el.offsetWidth;
+      var height = el.offsetHeight;
+      var top = el.offsetTop;
+      var left = el.offsetLeft;
+
+      while(el.offsetParent) {
+        el = el.offsetParent;
+        top += el.offsetTop;
+        left += el.offsetLeft;
+      }
+
+      return (
+        (top + (height)) >= window.pageYOffset &&
+        left >= window.pageXOffset &&
+        (top + (height/3)) <= (window.pageYOffset + window.innerHeight) &&
+        (left + (width/2)) <= (window.pageXOffset + window.innerWidth)
+      );
+    }
   },
   updated() {
     this.handleFocusLost();
@@ -237,6 +293,8 @@ export default {
     });
     focusHandler.on("RESET_FOCUS", this.resetFocus);
     focusHandler.on("SET_FOCUS", this.setExternalFocus);
+
+    this.ready = true;
   },
   destroyed() {
     disableNavigation(`list-${this.id}`);
@@ -247,11 +305,23 @@ export default {
 </script>
 
 <style lang="css" scoped>
+h3{
+  color: #fff;
+  text-align: left;
+  margin: 32px 0 16px;
+  font-size: 1.6vmax;
+}
 .list {
   display: flex;
+  transition: all 0.15s ease;
+  position: relative;
 }
 .child {
   display: flex;
+  transition: opacity 0.2s ease;
+}
+.hide{
+  opacity: 0;
 }
 .vertical {
   flex-direction: column;

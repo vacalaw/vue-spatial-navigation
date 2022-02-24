@@ -7,6 +7,7 @@
   >
     <div
       class="child"
+      v-bind:style="columns"
       ref="childItem"
       v-for="(item, index) in items"
       :key="index"
@@ -24,7 +25,7 @@
 <script>
 import { enableNavigation, disableNavigation, focusHandler } from "@/event-bus";
 export default {
-  name: "focusableGrid",
+  name: "FocusableGrid",
   props: {
     child: {
       type: Object, //Child component (eg: card, button)
@@ -67,9 +68,12 @@ export default {
     };
   },
   computed: {
+    columns(){
+      return {width: `${100 / this.maxColumn}%`}
+    },
     style() {
       return {
-        transform: `translateY(${this.scrollAmount}px)`,
+        top: `${this.scrollAmount}px`,
       };
     },
   },
@@ -123,6 +127,17 @@ export default {
         this.$refs.childItem[this.focusedIndex],
         negative
       );
+
+      // hide Elements in the dom
+      setTimeout(()=>{
+        this.$refs.childItem.forEach((el)=>{
+          if(!this.elementInViewport(el)){
+              el.classList.add('hide');
+          } else{
+              el.classList.remove('hide');
+          }
+        })
+      },150)
     },
     handleFocusLost() {
       if (this.focusedIndex > this.items.length - 1) {
@@ -137,6 +152,25 @@ export default {
         this.scrollAmount = 0;
       }
     },
+    elementInViewport(el) {
+      var width = el.offsetWidth;
+      var height = el.offsetHeight;
+      var top = el.offsetTop;
+      var left = el.offsetLeft;
+
+      while(el.offsetParent) {
+        el = el.offsetParent;
+        top += el.offsetTop;
+        left += el.offsetLeft;
+      }
+
+      return (
+        (top + (height/2)) >= window.pageYOffset &&
+        left >= window.pageXOffset &&
+        (top + (height/2)) <= (window.pageYOffset + window.innerHeight) &&
+        (left + width) <= (window.pageXOffset + window.innerWidth)
+      );
+    }
   },
   updated() {
     this.handleFocusLost();
@@ -169,6 +203,15 @@ export default {
       id: `grid-${this.id}`,
     });
     focusHandler.on("RESET_FOCUS", this.resetFocus);
+
+    // hide Elements in the dom
+    this.$refs.childItem.forEach((el)=>{
+        if(!this.elementInViewport(el)){
+            el.classList.add('hide');
+        } else{
+            el.classList.remove('hide');
+        }
+    })
   },
   destroyed() {
     disableNavigation(`grid-${this.id}`);
@@ -181,11 +224,17 @@ export default {
 .grid {
   display: flex;
   flex-wrap: wrap;
+  position: relative;
+  transition: top 0.15s ease;
 }
 .child {
   display: flex;
+  transition: opacity 0.2s ease;
 }
 .vertical {
   flex-direction: column;
+}
+.hide{
+  opacity: 0;
 }
 </style>

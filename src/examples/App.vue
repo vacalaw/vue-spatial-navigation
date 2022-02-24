@@ -9,14 +9,14 @@
 
 <script>
 import SideNav from "@/examples/SideNav";
-import {FocusableGrid} from '../../dist/vue-spatial-navigation.esm'
+import {Grid} from '../../dist/vue-spatial-navigation.esm'
 export default {
   name: "App",
   components: {
     SideNav,
   },
   created(){
-    console.error(FocusableGrid)
+    // console.error(Grid)
   }
 };
 </script>

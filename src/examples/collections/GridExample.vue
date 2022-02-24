@@ -19,7 +19,7 @@ export default {
   },
   data() {
     return {
-      items: gridData.map((item) => ({ items: item })),
+      items: gridData.map((item) => ({ items: item, width:'100%' })),
       Card: Card,
     };
   },
@@ -28,6 +28,6 @@ export default {
 
 <style lang="css" scoped>
 .grid {
-  width: 1000px;
+  width: 100%;
 }
 </style>

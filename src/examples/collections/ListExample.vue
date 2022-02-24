@@ -5,6 +5,7 @@
     :items="items"
     :shouldScroll="shouldScroll"
     v-on:onFocusChange="onFocusHandler"
+    orientation="VERTICAL"
   />
 </template>
 
@@ -25,7 +26,7 @@ export default {
   },
   methods: {
     onFocusHandler(data) {
-      console.error(data);
+      console.log(data);
     },
   },
 };

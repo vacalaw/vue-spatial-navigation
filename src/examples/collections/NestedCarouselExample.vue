@@ -4,6 +4,7 @@
     :isFocused="true"
     :items="items"
     :shouldScroll="shouldScroll"
+    :onFocusChange="onFocusHandler"
     orientation="VERTICAL"
   />
 </template>
@@ -11,7 +12,7 @@
 <script>
 import List from "@/focusable/List";
 import Card from "@/examples/components/Card";
-import { carouselData } from "../mock/mock";
+import { carouselData, gridData } from "../mock/mock";
 export default {
   components: {
     List,
@@ -20,21 +21,70 @@ export default {
     return {
       items: [
         {
-          child: Card,
           shouldScroll: true,
-          items: carouselData[0].map((item) => ({ items: item })),
+          title: 'Test1',
+          child: Card,
+          // onChildChange: this.onFocusHandler,
+          items: gridData.map((item) => ({ items: item, width: '20vw'})),
         },
         {
           child: Card,
           shouldScroll: true,
-          disabledIndex: [3],
-          items: carouselData[1].map((item) => ({ items: item })),
+          title: 'Test1',
+          items: gridData.map((item) => ({ items: item, width: '20vw',})),
+        },
+        {
+          child: Card,
+          shouldScroll: true,
+          title: 'Test1',
+          items: gridData.map((item) => ({ items: item, width: '20vw',})),
+        },
+        {
+          child: Card,
+          shouldScroll: true,
+          title: 'Test1',
+          items: gridData.map((item) => ({ items: item, width: '20vw',})),
+        },
+        {
+          child: Card,
+          shouldScroll: true,
+          title: 'Test1',
+          items: gridData.map((item) => ({ items: item, width: '20vw',})),
+        },
+        {
+          child: Card,
+          shouldScroll: true,
+          title: 'Test1',
+          items: gridData.map((item) => ({ items: item, width: '20vw',})),
+        },
+        {
+          child: Card,
+          shouldScroll: true,
+          title: 'Test1',
+          items: gridData.map((item) => ({ items: item, width: '20vw',})),
+        },
+        {
+          child: Card,
+          shouldScroll: true,
+          title: 'Test1',
+          items: gridData.map((item) => ({ items: item, width: '20vw',})),
+        },
+        {
+          child: Card,
+          shouldScroll: true,
+          title: 'Test1',
+          items: gridData.map((item) => ({ items: item, width: '20vw',})),
         },
       ],
       child: List,
       shouldScroll: true,
     };
   },
+  methods:{
+    onFocusHandler(data){
+      console.log(data.newIndex ,data.prevIndex);
+    }
+  }
 };
 </script>
 
