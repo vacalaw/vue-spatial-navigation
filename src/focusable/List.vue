@@ -32,6 +32,10 @@ import { enableNavigation, disableNavigation, focusHandler } from "@/event-bus";
 export default {
   name: "focusableList",
   props: {
+    onSettled:{
+      type: Function,
+      required: false,
+    },
     onChildChange:{
       type: Function,
       required: false,
@@ -267,6 +271,11 @@ export default {
         (top + (height/3)) <= (window.pageYOffset + window.innerHeight) &&
         (left + (width/2)) <= (window.pageXOffset + window.innerWidth)
       );
+    },
+    onSettledFunction(arg){
+      if(this.ready && this.onSettled){
+        this.onSettled(arg);
+      }
     }
   },
   updated() {
@@ -281,12 +290,16 @@ export default {
         if (this.isPrevItemPresent()) {
           this.updateFocus("reverse");
           this.updateScrollValue();
+        } else{
+          this.onSettledFunction('FIRST');
         }
       },
       [KEYS.FORWARD]: () => {
         if (this.isNextItemPresent()) {
           this.updateFocus();
           this.updateScrollValue();
+        } else{
+          this.onSettledFunction('LAST');
         }
       },
       preCondition: () => this.isFocused && !this.disabled,

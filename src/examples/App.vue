@@ -22,6 +22,13 @@ export default {
 </script>
 
 <style>
+body,html{
+  padding: 0;
+  margin: 0;
+}
+*{
+  box-sizing: border-box;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -41,7 +48,8 @@ body {
 .main-content {
   display: flex;
   flex-direction: column;
-  padding: 100px;
+  padding: 4%;
+  height: 100vh;
   overflow: hidden;
 }
 </style>

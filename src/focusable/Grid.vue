@@ -131,10 +131,10 @@ export default {
       // hide Elements in the dom
       setTimeout(()=>{
         this.$refs.childItem.forEach((el)=>{
-          if(!this.elementInViewport(el)){
-              el.classList.add('hide');
+          if(this.elementInViewport(el)){
+              el.classList.add('show');
           } else{
-              el.classList.remove('hide');
+              el.classList.remove('show');
           }
         })
       },150)
@@ -153,6 +153,7 @@ export default {
       }
     },
     elementInViewport(el) {
+      const container = el.parentNode.parentNode;
       var width = el.offsetWidth;
       var height = el.offsetHeight;
       var top = el.offsetTop;
@@ -163,12 +164,11 @@ export default {
         top += el.offsetTop;
         left += el.offsetLeft;
       }
-
       return (
-        (top + (height/2)) >= window.pageYOffset &&
-        left >= window.pageXOffset &&
-        (top + (height/2)) <= (window.pageYOffset + window.innerHeight) &&
-        (left + width) <= (window.pageXOffset + window.innerWidth)
+        (top + height) >= container.scrollTop &&
+        // left >= container.scrollLeft &&
+        (top + (height/2)) <= (container.scrollTop + container.offsetHeight)
+        // && (left - width) <= (container.scrollLeft + container.offsetWidth)
       );
     }
   },
@@ -206,10 +206,10 @@ export default {
 
     // hide Elements in the dom
     this.$refs.childItem.forEach((el)=>{
-        if(!this.elementInViewport(el)){
-            el.classList.add('hide');
+        if(this.elementInViewport(el)){
+            el.classList.add('show');
         } else{
-            el.classList.remove('hide');
+            el.classList.remove('show');
         }
     })
   },
@@ -229,12 +229,27 @@ export default {
 }
 .child {
   display: flex;
-  transition: opacity 0.2s ease;
+  visibility: hidden;
+  opacity: 0;
 }
 .vertical {
   flex-direction: column;
 }
-.hide{
-  opacity: 0;
+.show{
+  animation-name: show;
+  animation-duration: 0.2s;
+  animation-fill-mode: forwards;
+}
+.child:focus-within{
+  z-index: 20;
+}
+@keyframes show {
+  from{
+    visibility: hidden;
+  }
+  to{
+    visibility: visible;
+    opacity: 1;
+  }
 }
 </style>

@@ -61,7 +61,7 @@ img {
   object-fit: cover;
 }
 .focus {
-  transform: scale(1.05);
+  transform: scale(1.08);
   z-index: 2;
   position: relative;
   border-color:white;
