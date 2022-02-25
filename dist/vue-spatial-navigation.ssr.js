@@ -210,10 +210,10 @@ var script = {
 
       setTimeout(function () {
         _this.$refs.childItem.forEach(function (el) {
-          if (!_this.elementInViewport(el)) {
-            el.classList.add('hide');
+          if (_this.elementInViewport(el)) {
+            el.classList.add('show');
           } else {
-            el.classList.remove('hide');
+            el.classList.remove('show');
           }
         });
       }, 150);
@@ -234,6 +234,7 @@ var script = {
       }
     },
     elementInViewport: function elementInViewport(el) {
+      var container = el.parentNode.parentNode;
       var width = el.offsetWidth;
       var height = el.offsetHeight;
       var top = el.offsetTop;
@@ -245,7 +246,9 @@ var script = {
         left += el.offsetLeft;
       }
 
-      return top + height / 2 >= window.pageYOffset && left >= window.pageXOffset && top + height / 2 <= window.pageYOffset + window.innerHeight && left + width <= window.pageXOffset + window.innerWidth;
+      return top + height >= container.scrollTop && // left >= container.scrollLeft &&
+      top + height / 2 <= container.scrollTop + container.offsetHeight // && (left - width) <= (container.scrollLeft + container.offsetWidth)
+      ;
     }
   },
   updated: function updated() {
@@ -287,10 +290,10 @@ var script = {
     focusHandler.on("RESET_FOCUS", this.resetFocus); // hide Elements in the dom
 
     this.$refs.childItem.forEach(function (el) {
-      if (!_this2.elementInViewport(el)) {
-        el.classList.add('hide');
+      if (_this2.elementInViewport(el)) {
+        el.classList.add('show');
       } else {
-        el.classList.remove('hide');
+        el.classList.remove('show');
       }
     });
   },
@@ -430,7 +433,7 @@ var __vue_render__ = function __vue_render__() {
     },
     style: _vm.style
   }, _vm._l(_vm.items, function (item, index) {
-    return _vm._ssrNode("<div class=\"child\"" + _vm._ssrStyle(null, _vm.columns, null) + " data-v-c83184de>", "</div>", [_c(_vm.child, _vm._b({
+    return _vm._ssrNode("<div class=\"child\"" + _vm._ssrStyle(null, _vm.columns, null) + " data-v-6e2a73a0>", "</div>", [_c(_vm.child, _vm._b({
       tag: "component",
       attrs: {
         "id": "child" + (item.id || index),
@@ -445,8 +448,8 @@ var __vue_staticRenderFns__ = [];
 
 var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-c83184de_0", {
-    source: ".grid[data-v-c83184de]{display:flex;flex-wrap:wrap;position:relative;transition:top .15s ease}.child[data-v-c83184de]{display:flex;transition:opacity .2s ease}.vertical[data-v-c83184de]{flex-direction:column}.hide[data-v-c83184de]{opacity:0}",
+  inject("data-v-6e2a73a0_0", {
+    source: ".grid[data-v-6e2a73a0]{display:flex;flex-wrap:wrap;position:relative;transition:top .15s ease}.child[data-v-6e2a73a0]{display:flex;visibility:hidden;opacity:0}.vertical[data-v-6e2a73a0]{flex-direction:column}.show[data-v-6e2a73a0]{animation-name:show-data-v-6e2a73a0;animation-duration:.2s;animation-fill-mode:forwards}.child[data-v-6e2a73a0]:focus-within{z-index:20}@keyframes show-data-v-6e2a73a0{from{visibility:hidden}to{visibility:visible;opacity:1}}",
     map: undefined,
     media: undefined
   });
@@ -454,10 +457,10 @@ var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
 /* scoped */
 
 
-var __vue_scope_id__ = "data-v-c83184de";
+var __vue_scope_id__ = "data-v-6e2a73a0";
 /* module identifier */
 
-var __vue_module_identifier__ = "data-v-c83184de";
+var __vue_module_identifier__ = "data-v-6e2a73a0";
 /* functional template */
 
 var __vue_is_functional_template__ = false;
@@ -469,6 +472,10 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
 }, __vue_inject_styles__, __vue_script__, __vue_scope_id__, __vue_is_functional_template__, __vue_module_identifier__, false, undefined, createInjectorSSR, undefined);var script$1 = {
   name: "focusableList",
   props: {
+    onSettled: {
+      type: Function,
+      required: false
+    },
     onChildChange: {
       type: Function,
       required: false
@@ -708,6 +715,11 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
       }
 
       return top + height >= window.pageYOffset && left >= window.pageXOffset && top + height / 3 <= window.pageYOffset + window.innerHeight && left + width / 2 <= window.pageXOffset + window.innerWidth;
+    },
+    onSettledFunction: function onSettledFunction(arg) {
+      if (this.ready && this.onSettled) {
+        this.onSettled(arg);
+      }
     }
   },
   updated: function updated() {
@@ -726,12 +738,16 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
         _this2.updateFocus("reverse");
 
         _this2.updateScrollValue();
+      } else {
+        _this2.onSettledFunction('FIRST');
       }
     }), _defineProperty(_enableNavigation, KEYS.FORWARD, function () {
       if (_this2.isNextItemPresent()) {
         _this2.updateFocus();
 
         _this2.updateScrollValue();
+      } else {
+        _this2.onSettledFunction('LAST');
       }
     }), _defineProperty(_enableNavigation, "preCondition", function preCondition() {
       return _this2.isFocused && !_this2.disabled;
@@ -756,11 +772,11 @@ var __vue_render__$1 = function __vue_render__() {
 
   var _c = _vm._self._c || _h;
 
-  return _c('div', [_vm._ssrNode((_vm.title ? "<h3 data-v-090100b2>" + _vm._ssrEscape(_vm._s(_vm.title)) + "</h3>" : "<!---->") + " "), _vm._ssrNode("<div" + _vm._ssrClass("list", {
+  return _c('div', [_vm._ssrNode((_vm.title ? "<h3 data-v-d6e3a254>" + _vm._ssrEscape(_vm._s(_vm.title)) + "</h3>" : "<!---->") + " "), _vm._ssrNode("<div" + _vm._ssrClass("list", {
     focus: _vm.isFocused,
     vertical: _vm.orientation === 'VERTICAL'
-  }) + _vm._ssrStyle(null, _vm.style, null) + " data-v-090100b2>", "</div>", _vm._l(_vm.items, function (item, index) {
-    return _vm._ssrNode("<div class=\"child\" data-v-090100b2>", "</div>", [_c(_vm.child, _vm._b({
+  }) + _vm._ssrStyle(null, _vm.style, null) + " data-v-d6e3a254>", "</div>", _vm._l(_vm.items, function (item, index) {
+    return _vm._ssrNode("<div class=\"child\" data-v-d6e3a254>", "</div>", [_c(_vm.child, _vm._b({
       tag: "component",
       class: {
         disabled: _vm.disabledIndex.includes(index)
@@ -779,8 +795,8 @@ var __vue_staticRenderFns__$1 = [];
 
 var __vue_inject_styles__$1 = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-090100b2_0", {
-    source: "h3[data-v-090100b2]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-090100b2]{display:flex;transition:all .15s ease;position:relative}.child[data-v-090100b2]{display:flex;transition:opacity .2s ease}.hide[data-v-090100b2]{opacity:0}.vertical[data-v-090100b2]{flex-direction:column}.disabled[data-v-090100b2]{background:grey}",
+  inject("data-v-d6e3a254_0", {
+    source: "h3[data-v-d6e3a254]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-d6e3a254]{display:flex;transition:all .15s ease;position:relative}.child[data-v-d6e3a254]{display:flex;transition:opacity .2s ease}.hide[data-v-d6e3a254]{opacity:0}.vertical[data-v-d6e3a254]{flex-direction:column}.disabled[data-v-d6e3a254]{background:grey}",
     map: undefined,
     media: undefined
   });
@@ -788,10 +804,10 @@ var __vue_inject_styles__$1 = function __vue_inject_styles__(inject) {
 /* scoped */
 
 
-var __vue_scope_id__$1 = "data-v-090100b2";
+var __vue_scope_id__$1 = "data-v-d6e3a254";
 /* module identifier */
 
-var __vue_module_identifier__$1 = "data-v-090100b2";
+var __vue_module_identifier__$1 = "data-v-d6e3a254";
 /* functional template */
 
 var __vue_is_functional_template__$1 = false;

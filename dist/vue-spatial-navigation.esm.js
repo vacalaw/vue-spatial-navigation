@@ -151,10 +151,10 @@ var script = {
 
       setTimeout(() => {
         this.$refs.childItem.forEach(el => {
-          if (!this.elementInViewport(el)) {
-            el.classList.add('hide');
+          if (this.elementInViewport(el)) {
+            el.classList.add('show');
           } else {
-            el.classList.remove('hide');
+            el.classList.remove('show');
           }
         });
       }, 150);
@@ -178,6 +178,7 @@ var script = {
     },
 
     elementInViewport(el) {
+      const container = el.parentNode.parentNode;
       var width = el.offsetWidth;
       var height = el.offsetHeight;
       var top = el.offsetTop;
@@ -189,7 +190,9 @@ var script = {
         left += el.offsetLeft;
       }
 
-      return top + height / 2 >= window.pageYOffset && left >= window.pageXOffset && top + height / 2 <= window.pageYOffset + window.innerHeight && left + width <= window.pageXOffset + window.innerWidth;
+      return top + height >= container.scrollTop && // left >= container.scrollLeft &&
+      top + height / 2 <= container.scrollTop + container.offsetHeight // && (left - width) <= (container.scrollLeft + container.offsetWidth)
+      ;
     }
 
   },
@@ -228,10 +231,10 @@ var script = {
     focusHandler.on("RESET_FOCUS", this.resetFocus); // hide Elements in the dom
 
     this.$refs.childItem.forEach(el => {
-      if (!this.elementInViewport(el)) {
-        el.classList.add('hide');
+      if (this.elementInViewport(el)) {
+        el.classList.add('show');
       } else {
-        el.classList.remove('hide');
+        el.classList.remove('show');
       }
     });
   },
@@ -411,8 +414,8 @@ var __vue_staticRenderFns__ = [];
 
 const __vue_inject_styles__ = function (inject) {
   if (!inject) return;
-  inject("data-v-c83184de_0", {
-    source: ".grid[data-v-c83184de]{display:flex;flex-wrap:wrap;position:relative;transition:top .15s ease}.child[data-v-c83184de]{display:flex;transition:opacity .2s ease}.vertical[data-v-c83184de]{flex-direction:column}.hide[data-v-c83184de]{opacity:0}",
+  inject("data-v-6e2a73a0_0", {
+    source: ".grid[data-v-6e2a73a0]{display:flex;flex-wrap:wrap;position:relative;transition:top .15s ease}.child[data-v-6e2a73a0]{display:flex;visibility:hidden;opacity:0}.vertical[data-v-6e2a73a0]{flex-direction:column}.show[data-v-6e2a73a0]{animation-name:show-data-v-6e2a73a0;animation-duration:.2s;animation-fill-mode:forwards}.child[data-v-6e2a73a0]:focus-within{z-index:20}@keyframes show-data-v-6e2a73a0{from{visibility:hidden}to{visibility:visible;opacity:1}}",
     map: undefined,
     media: undefined
   });
@@ -420,7 +423,7 @@ const __vue_inject_styles__ = function (inject) {
 /* scoped */
 
 
-const __vue_scope_id__ = "data-v-c83184de";
+const __vue_scope_id__ = "data-v-6e2a73a0";
 /* module identifier */
 
 const __vue_module_identifier__ = undefined;
@@ -440,6 +443,10 @@ const __vue_component__ = /*#__PURE__*/normalizeComponent({
 var script$1 = {
   name: "focusableList",
   props: {
+    onSettled: {
+      type: Function,
+      required: false
+    },
     onChildChange: {
       type: Function,
       required: false
@@ -688,6 +695,12 @@ var script$1 = {
       }
 
       return top + height >= window.pageYOffset && left >= window.pageXOffset && top + height / 3 <= window.pageYOffset + window.innerHeight && left + width / 2 <= window.pageXOffset + window.innerWidth;
+    },
+
+    onSettledFunction(arg) {
+      if (this.ready && this.onSettled) {
+        this.onSettled(arg);
+      }
     }
 
   },
@@ -705,12 +718,16 @@ var script$1 = {
         if (this.isPrevItemPresent()) {
           this.updateFocus("reverse");
           this.updateScrollValue();
+        } else {
+          this.onSettledFunction('FIRST');
         }
       },
       [KEYS.FORWARD]: () => {
         if (this.isNextItemPresent()) {
           this.updateFocus();
           this.updateScrollValue();
+        } else {
+          this.onSettledFunction('LAST');
         }
       },
       preCondition: () => this.isFocused && !this.disabled
@@ -772,8 +789,8 @@ var __vue_staticRenderFns__$1 = [];
 
 const __vue_inject_styles__$1 = function (inject) {
   if (!inject) return;
-  inject("data-v-090100b2_0", {
-    source: "h3[data-v-090100b2]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-090100b2]{display:flex;transition:all .15s ease;position:relative}.child[data-v-090100b2]{display:flex;transition:opacity .2s ease}.hide[data-v-090100b2]{opacity:0}.vertical[data-v-090100b2]{flex-direction:column}.disabled[data-v-090100b2]{background:grey}",
+  inject("data-v-d6e3a254_0", {
+    source: "h3[data-v-d6e3a254]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-d6e3a254]{display:flex;transition:all .15s ease;position:relative}.child[data-v-d6e3a254]{display:flex;transition:opacity .2s ease}.hide[data-v-d6e3a254]{opacity:0}.vertical[data-v-d6e3a254]{flex-direction:column}.disabled[data-v-d6e3a254]{background:grey}",
     map: undefined,
     media: undefined
   });
@@ -781,7 +798,7 @@ const __vue_inject_styles__$1 = function (inject) {
 /* scoped */
 
 
-const __vue_scope_id__$1 = "data-v-090100b2";
+const __vue_scope_id__$1 = "data-v-d6e3a254";
 /* module identifier */
 
 const __vue_module_identifier__$1 = undefined;
