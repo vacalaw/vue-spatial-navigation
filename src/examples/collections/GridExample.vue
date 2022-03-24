@@ -1,21 +1,27 @@
 <template>
-  <Grid
+  <FocusableGrid
     :child="Card"
-    :isFocused="true"
+    :isFocused="selected"
     :items="items"
+    :onSettled="onFocusHandler"
     :shouldScroll="true"
     :maxColumn="4"
   />
 </template>
 
 <script>
-import Grid from "@/focusable/Grid";
+import FocusableGrid from "@/focusable/Grid";
 import Card from "@/examples/components/Card";
 import { gridData } from "../mock/mock";
 export default {
   props: ["shouldScroll"],
   components: {
-    Grid,
+    FocusableGrid,
+  },
+  computed:{
+    selected(){
+      return this.$parent._data.focusElement === 'home'
+    }
   },
   data() {
     return {
@@ -23,6 +29,13 @@ export default {
       Card: Card,
     };
   },
+  methods:{
+    onFocusHandler(data){
+      if(data == 'LEFT'){
+        this.$parent._data.focusElement = 'menu'
+      }
+    }
+  }
 };
 </script>
 

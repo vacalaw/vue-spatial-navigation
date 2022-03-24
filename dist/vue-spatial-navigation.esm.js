@@ -40,6 +40,10 @@ const disableNavigation = id => {
 var script = {
   name: "FocusableGrid",
   props: {
+    onSettled: {
+      type: Function,
+      required: false
+    },
     child: {
       type: Object,
       //Child component (eg: card, button)
@@ -147,17 +151,7 @@ var script = {
     },
 
     updateScrollValue(negative) {
-      this.scrollAmount += this.getScrollAmount(this.$refs.childItem[this.focusedIndex], negative); // hide Elements in the dom
-
-      setTimeout(() => {
-        this.$refs.childItem.forEach(el => {
-          if (this.elementInViewport(el)) {
-            el.classList.add('show');
-          } else {
-            el.classList.remove('show');
-          }
-        });
-      }, 150);
+      this.scrollAmount += this.getScrollAmount(this.$refs.childItem[this.focusedIndex], negative);
     },
 
     handleFocusLost() {
@@ -178,27 +172,34 @@ var script = {
     },
 
     elementInViewport(el) {
-      const container = el.parentNode.parentNode;
-      var width = el.offsetWidth;
-      var height = el.offsetHeight;
-      var top = el.offsetTop;
-      var left = el.offsetLeft;
+      var container = this.$el;
+      var parentRect = container.getBoundingClientRect();
+      var childRect = el.getBoundingClientRect(); // var hcheck = childRect.left + childRect.width >= parentRect.left && childRect.right - childRect.width / 2 <= parentRect.right;
 
-      while (el.offsetParent) {
-        el = el.offsetParent;
-        top += el.offsetTop;
-        left += el.offsetLeft;
+      var vcheck = childRect.top + childRect.height >= parentRect.top && childRect.bottom - childRect.height <= parentRect.bottom;
+      return vcheck;
+    },
+
+    onSettledFunction(arg) {
+      if (this.onSettled) {
+        this.onSettled(arg);
       }
-
-      return top + height >= container.scrollTop && // left >= container.scrollLeft &&
-      top + height / 2 <= container.scrollTop + container.offsetHeight // && (left - width) <= (container.scrollLeft + container.offsetWidth)
-      ;
     }
 
   },
 
   updated() {
-    this.handleFocusLost();
+    this.handleFocusLost(); // hide Elements in the dom
+
+    setTimeout(() => {
+      this.$refs.childItem.forEach(el => {
+        if (this.elementInViewport(el)) {
+          el.classList.remove('hide');
+        } else {
+          el.classList.add('hide');
+        }
+      });
+    }, 200);
   },
 
   mounted() {
@@ -206,37 +207,37 @@ var script = {
       LEFT: () => {
         if (this.isPrevColumnPresent()) {
           this.updateColumn("reverse");
+        } else {
+          this.onSettledFunction('LEFT');
         }
       },
       RIGHT: () => {
         if (this.isNextColumnPresent()) {
           this.updateColumn();
+        } else {
+          this.onSettledFunction('RIGHT');
         }
       },
       UP: () => {
         if (this.isPrevRowPresent()) {
           this.updateRow("reverse");
           if (this.shouldScroll) this.updateScrollValue();
+        } else {
+          this.onSettledFunction('UP');
         }
       },
       DOWN: () => {
         if (this.isNextRowPresent()) {
           this.updateRow();
           if (this.shouldScroll) this.updateScrollValue("negative");
+        } else {
+          this.onSettledFunction('DOWN');
         }
       },
       preCondition: () => this.isFocused && !this.disabled,
       id: `grid-${this.id}`
     });
-    focusHandler.on("RESET_FOCUS", this.resetFocus); // hide Elements in the dom
-
-    this.$refs.childItem.forEach(el => {
-      if (this.elementInViewport(el)) {
-        el.classList.add('show');
-      } else {
-        el.classList.remove('show');
-      }
-    });
+    focusHandler.on("RESET_FOCUS", this.resetFocus);
   },
 
   destroyed() {
@@ -386,6 +387,8 @@ var __vue_render__ = function () {
   var _c = _vm._self._c || _h;
 
   return _c('div', {
+    staticClass: "focusableGrid"
+  }, [_c('div', {
     ref: "grid",
     staticClass: "grid",
     class: {
@@ -406,7 +409,7 @@ var __vue_render__ = function () {
         "isFocused": _vm.isFocused && index === _vm.focusedIndex
       }
     }, 'component', item, false))], 1);
-  }), 0);
+  }), 0)]);
 };
 
 var __vue_staticRenderFns__ = [];
@@ -414,8 +417,8 @@ var __vue_staticRenderFns__ = [];
 
 const __vue_inject_styles__ = function (inject) {
   if (!inject) return;
-  inject("data-v-6e2a73a0_0", {
-    source: ".grid[data-v-6e2a73a0]{display:flex;flex-wrap:wrap;position:relative;transition:top .15s ease}.child[data-v-6e2a73a0]{display:flex;visibility:hidden;opacity:0}.vertical[data-v-6e2a73a0]{flex-direction:column}.show[data-v-6e2a73a0]{animation-name:show-data-v-6e2a73a0;animation-duration:.2s;animation-fill-mode:forwards}.child[data-v-6e2a73a0]:focus-within{z-index:20}@keyframes show-data-v-6e2a73a0{from{visibility:hidden}to{visibility:visible;opacity:1}}",
+  inject("data-v-8fa230a4_0", {
+    source: ".focusableGrid[data-v-8fa230a4]{width:100%;height:100%}.grid[data-v-8fa230a4]{display:flex;flex-wrap:wrap;position:relative;transition:top .15s ease}.child[data-v-8fa230a4]{display:flex;transition:opacity .15s ease}.hide[data-v-8fa230a4]{opacity:0}.vertical[data-v-8fa230a4]{flex-direction:column}",
     map: undefined,
     media: undefined
   });
@@ -423,7 +426,7 @@ const __vue_inject_styles__ = function (inject) {
 /* scoped */
 
 
-const __vue_scope_id__ = "data-v-6e2a73a0";
+const __vue_scope_id__ = "data-v-8fa230a4";
 /* module identifier */
 
 const __vue_module_identifier__ = undefined;
@@ -443,6 +446,10 @@ const __vue_component__ = /*#__PURE__*/normalizeComponent({
 var script$1 = {
   name: "focusableList",
   props: {
+    nested: {
+      type: Boolean,
+      default: false
+    },
     onSettled: {
       type: Function,
       required: false
@@ -636,27 +643,7 @@ var script$1 = {
     updateScrollValue() {
       if (this.shouldScroll && this.$refs.childItem) {
         this.scrollAmount = this.getScrollAmountByOrientation(this.$refs.childItem[0], this.orientation) * this.focusedIndex;
-      } // hide Elements in the dom
-
-
-      setTimeout(() => {
-        this.$refs.childItem.forEach(el => {
-          if (!this.elementInViewport(el)) {
-            el.classList.add('hide');
-          } else {
-            el.classList.remove('hide');
-            const childs = el.children[0].querySelectorAll('.child');
-
-            if (childs.length > 0) {
-              childs.forEach(el => {
-                if (this.elementInViewport(el)) {
-                  el.classList.remove('hide');
-                }
-              });
-            }
-          }
-        });
-      }, 150);
+      }
     },
 
     resetFocus({
@@ -683,18 +670,13 @@ var script$1 = {
     },
 
     elementInViewport(el) {
-      var width = el.offsetWidth;
-      var height = el.offsetHeight;
-      var top = el.offsetTop;
-      var left = el.offsetLeft;
-
-      while (el.offsetParent) {
-        el = el.offsetParent;
-        top += el.offsetTop;
-        left += el.offsetLeft;
-      }
-
-      return top + height >= window.pageYOffset && left >= window.pageXOffset && top + height / 3 <= window.pageYOffset + window.innerHeight && left + width / 2 <= window.pageXOffset + window.innerWidth;
+      // console.log(this.$el)
+      var container = this.$el;
+      var parentRect = container.getBoundingClientRect();
+      var childRect = el.getBoundingClientRect();
+      var hcheck = childRect.left + childRect.width >= parentRect.left && childRect.right - childRect.width / 2 <= parentRect.right;
+      var vcheck = childRect.top + childRect.height >= parentRect.top && childRect.bottom - childRect.height <= parentRect.bottom;
+      return hcheck && vcheck;
     },
 
     onSettledFunction(arg) {
@@ -706,20 +688,41 @@ var script$1 = {
   },
 
   updated() {
-    this.handleFocusLost();
+    this.handleFocusLost(); // hide Elements in the dom
+
+    setTimeout(() => {
+      this.$refs.childItem.forEach(el => {
+        if (!this.elementInViewport(el)) {
+          el.classList.add("hide");
+        } else {
+          el.classList.remove("hide");
+        }
+      });
+    }, 250);
   },
 
   mounted() {
     this.setInitialvalue();
     let KEYS = this.getKeysByOrientation(this.orientation);
+    let KEYSLR = this.getKeysByOrientation(!this.orientation);
     enableNavigation({
       id: `list-${this.id}`,
+      [KEYSLR.REVERSE]: () => {
+        if (this.orientation == 'VERTICAL' && !this.nested) {
+          this.onSettledFunction(KEYSLR.REVERSE);
+        }
+      },
+      [KEYSLR.FORWARD]: () => {
+        if (this.orientation == 'VERTICAL' && !this.nested) {
+          this.onSettledFunction(KEYSLR.FORWARD);
+        }
+      },
       [KEYS.REVERSE]: () => {
         if (this.isPrevItemPresent()) {
           this.updateFocus("reverse");
           this.updateScrollValue();
         } else {
-          this.onSettledFunction('FIRST');
+          this.onSettledFunction(KEYS.REVERSE);
         }
       },
       [KEYS.FORWARD]: () => {
@@ -727,7 +730,7 @@ var script$1 = {
           this.updateFocus();
           this.updateScrollValue();
         } else {
-          this.onSettledFunction('LAST');
+          this.onSettledFunction(KEYS.FORWARD);
         }
       },
       preCondition: () => this.isFocused && !this.disabled
@@ -756,7 +759,9 @@ var __vue_render__$1 = function () {
 
   var _c = _vm._self._c || _h;
 
-  return _c('div', [_vm.title ? _c('h3', [_vm._v(_vm._s(_vm.title))]) : _vm._e(), _vm._v(" "), _c('div', {
+  return _c('div', {
+    staticClass: "focusableList"
+  }, [_vm.title ? _c('h3', [_vm._v(_vm._s(_vm.title))]) : _vm._e(), _vm._v(" "), _c('div', {
     ref: "list",
     staticClass: "list",
     class: {
@@ -789,8 +794,8 @@ var __vue_staticRenderFns__$1 = [];
 
 const __vue_inject_styles__$1 = function (inject) {
   if (!inject) return;
-  inject("data-v-d6e3a254_0", {
-    source: "h3[data-v-d6e3a254]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-d6e3a254]{display:flex;transition:all .15s ease;position:relative}.child[data-v-d6e3a254]{display:flex;transition:opacity .2s ease}.hide[data-v-d6e3a254]{opacity:0}.vertical[data-v-d6e3a254]{flex-direction:column}.disabled[data-v-d6e3a254]{background:grey}",
+  inject("data-v-bf74ef1a_0", {
+    source: ".focusableList[data-v-bf74ef1a]{height:100%;width:100%}h3[data-v-bf74ef1a]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-bf74ef1a]{display:flex;transition:all .15s ease;position:relative}.child[data-v-bf74ef1a]{display:flex;transition:opacity .15s ease}.hide[data-v-bf74ef1a]{opacity:0}.vertical[data-v-bf74ef1a]{flex-direction:column}.disabled[data-v-bf74ef1a]{background:grey}",
     map: undefined,
     media: undefined
   });
@@ -798,7 +803,7 @@ const __vue_inject_styles__$1 = function (inject) {
 /* scoped */
 
 
-const __vue_scope_id__$1 = "data-v-d6e3a254";
+const __vue_scope_id__$1 = "data-v-bf74ef1a";
 /* module identifier */
 
 const __vue_module_identifier__$1 = undefined;
@@ -817,7 +822,7 @@ const __vue_component__$1 = /*#__PURE__*/normalizeComponent({
 var components = /*#__PURE__*/Object.freeze({
   __proto__: null,
   FocusableList: __vue_component__$1,
-  Grid: __vue_component__
+  FocusableGrid: __vue_component__
 });
 
 // Import vue components
@@ -837,4 +842,4 @@ const plugin = {
 }; // To auto-install on non-es builds, when vue is found
 
 export default plugin;
-export { __vue_component__$1 as FocusableList, __vue_component__ as Grid };
+export { __vue_component__ as FocusableGrid, __vue_component__$1 as FocusableList };

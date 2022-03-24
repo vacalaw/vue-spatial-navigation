@@ -109,6 +109,10 @@ var disableNavigation = function disableNavigation(id) {
 var script = {
   name: "FocusableGrid",
   props: {
+    onSettled: {
+      type: Function,
+      required: false
+    },
     child: {
       type: Object,
       //Child component (eg: card, button)
@@ -204,19 +208,7 @@ var script = {
       return this.focusedIndex > this.items.length - 1;
     },
     updateScrollValue: function updateScrollValue(negative) {
-      var _this = this;
-
-      this.scrollAmount += this.getScrollAmount(this.$refs.childItem[this.focusedIndex], negative); // hide Elements in the dom
-
-      setTimeout(function () {
-        _this.$refs.childItem.forEach(function (el) {
-          if (_this.elementInViewport(el)) {
-            el.classList.add('show');
-          } else {
-            el.classList.remove('show');
-          }
-        });
-      }, 150);
+      this.scrollAmount += this.getScrollAmount(this.$refs.childItem[this.focusedIndex], negative);
     },
     handleFocusLost: function handleFocusLost() {
       if (this.focusedIndex > this.items.length - 1) {
@@ -234,25 +226,33 @@ var script = {
       }
     },
     elementInViewport: function elementInViewport(el) {
-      var container = el.parentNode.parentNode;
-      var width = el.offsetWidth;
-      var height = el.offsetHeight;
-      var top = el.offsetTop;
-      var left = el.offsetLeft;
+      var container = this.$el;
+      var parentRect = container.getBoundingClientRect();
+      var childRect = el.getBoundingClientRect(); // var hcheck = childRect.left + childRect.width >= parentRect.left && childRect.right - childRect.width / 2 <= parentRect.right;
 
-      while (el.offsetParent) {
-        el = el.offsetParent;
-        top += el.offsetTop;
-        left += el.offsetLeft;
+      var vcheck = childRect.top + childRect.height >= parentRect.top && childRect.bottom - childRect.height <= parentRect.bottom;
+      return vcheck;
+    },
+    onSettledFunction: function onSettledFunction(arg) {
+      if (this.onSettled) {
+        this.onSettled(arg);
       }
-
-      return top + height >= container.scrollTop && // left >= container.scrollLeft &&
-      top + height / 2 <= container.scrollTop + container.offsetHeight // && (left - width) <= (container.scrollLeft + container.offsetWidth)
-      ;
     }
   },
   updated: function updated() {
-    this.handleFocusLost();
+    var _this = this;
+
+    this.handleFocusLost(); // hide Elements in the dom
+
+    setTimeout(function () {
+      _this.$refs.childItem.forEach(function (el) {
+        if (_this.elementInViewport(el)) {
+          el.classList.remove('hide');
+        } else {
+          el.classList.add('hide');
+        }
+      });
+    }, 200);
   },
   mounted: function mounted() {
     var _this2 = this;
@@ -261,11 +261,15 @@ var script = {
       LEFT: function LEFT() {
         if (_this2.isPrevColumnPresent()) {
           _this2.updateColumn("reverse");
+        } else {
+          _this2.onSettledFunction('LEFT');
         }
       },
       RIGHT: function RIGHT() {
         if (_this2.isNextColumnPresent()) {
           _this2.updateColumn();
+        } else {
+          _this2.onSettledFunction('RIGHT');
         }
       },
       UP: function UP() {
@@ -273,6 +277,8 @@ var script = {
           _this2.updateRow("reverse");
 
           if (_this2.shouldScroll) _this2.updateScrollValue();
+        } else {
+          _this2.onSettledFunction('UP');
         }
       },
       DOWN: function DOWN() {
@@ -280,6 +286,8 @@ var script = {
           _this2.updateRow();
 
           if (_this2.shouldScroll) _this2.updateScrollValue("negative");
+        } else {
+          _this2.onSettledFunction('DOWN');
         }
       },
       preCondition: function preCondition() {
@@ -287,15 +295,7 @@ var script = {
       },
       id: "grid-".concat(this.id)
     });
-    focusHandler.on("RESET_FOCUS", this.resetFocus); // hide Elements in the dom
-
-    this.$refs.childItem.forEach(function (el) {
-      if (_this2.elementInViewport(el)) {
-        el.classList.add('show');
-      } else {
-        el.classList.remove('show');
-      }
-    });
+    focusHandler.on("RESET_FOCUS", this.resetFocus);
   },
   destroyed: function destroyed() {
     disableNavigation("grid-".concat(this.id));
@@ -426,21 +426,18 @@ var __vue_render__ = function __vue_render__() {
   var _c = _vm._self._c || _h;
 
   return _c('div', {
-    ref: "grid",
-    staticClass: "grid",
-    class: {
-      focus: _vm.isFocused
-    },
-    style: _vm.style
-  }, _vm._l(_vm.items, function (item, index) {
-    return _vm._ssrNode("<div class=\"child\"" + _vm._ssrStyle(null, _vm.columns, null) + " data-v-6e2a73a0>", "</div>", [_c(_vm.child, _vm._b({
+    staticClass: "focusableGrid"
+  }, [_vm._ssrNode("<div" + _vm._ssrClass("grid", {
+    focus: _vm.isFocused
+  }) + _vm._ssrStyle(null, _vm.style, null) + " data-v-8fa230a4>", "</div>", _vm._l(_vm.items, function (item, index) {
+    return _vm._ssrNode("<div class=\"child\"" + _vm._ssrStyle(null, _vm.columns, null) + " data-v-8fa230a4>", "</div>", [_c(_vm.child, _vm._b({
       tag: "component",
       attrs: {
         "id": "child" + (item.id || index),
         "isFocused": _vm.isFocused && index === _vm.focusedIndex
       }
     }, 'component', item, false))], 1);
-  }), 0);
+  }), 0)]);
 };
 
 var __vue_staticRenderFns__ = [];
@@ -448,8 +445,8 @@ var __vue_staticRenderFns__ = [];
 
 var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-6e2a73a0_0", {
-    source: ".grid[data-v-6e2a73a0]{display:flex;flex-wrap:wrap;position:relative;transition:top .15s ease}.child[data-v-6e2a73a0]{display:flex;visibility:hidden;opacity:0}.vertical[data-v-6e2a73a0]{flex-direction:column}.show[data-v-6e2a73a0]{animation-name:show-data-v-6e2a73a0;animation-duration:.2s;animation-fill-mode:forwards}.child[data-v-6e2a73a0]:focus-within{z-index:20}@keyframes show-data-v-6e2a73a0{from{visibility:hidden}to{visibility:visible;opacity:1}}",
+  inject("data-v-8fa230a4_0", {
+    source: ".focusableGrid[data-v-8fa230a4]{width:100%;height:100%}.grid[data-v-8fa230a4]{display:flex;flex-wrap:wrap;position:relative;transition:top .15s ease}.child[data-v-8fa230a4]{display:flex;transition:opacity .15s ease}.hide[data-v-8fa230a4]{opacity:0}.vertical[data-v-8fa230a4]{flex-direction:column}",
     map: undefined,
     media: undefined
   });
@@ -457,10 +454,10 @@ var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
 /* scoped */
 
 
-var __vue_scope_id__ = "data-v-6e2a73a0";
+var __vue_scope_id__ = "data-v-8fa230a4";
 /* module identifier */
 
-var __vue_module_identifier__ = "data-v-6e2a73a0";
+var __vue_module_identifier__ = "data-v-8fa230a4";
 /* functional template */
 
 var __vue_is_functional_template__ = false;
@@ -472,6 +469,10 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
 }, __vue_inject_styles__, __vue_script__, __vue_scope_id__, __vue_is_functional_template__, __vue_module_identifier__, false, undefined, createInjectorSSR, undefined);var script$1 = {
   name: "focusableList",
   props: {
+    nested: {
+      type: Boolean,
+      default: false
+    },
     onSettled: {
       type: Function,
       required: false
@@ -654,31 +655,9 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
       }
     },
     updateScrollValue: function updateScrollValue() {
-      var _this = this;
-
       if (this.shouldScroll && this.$refs.childItem) {
         this.scrollAmount = this.getScrollAmountByOrientation(this.$refs.childItem[0], this.orientation) * this.focusedIndex;
-      } // hide Elements in the dom
-
-
-      setTimeout(function () {
-        _this.$refs.childItem.forEach(function (el) {
-          if (!_this.elementInViewport(el)) {
-            el.classList.add('hide');
-          } else {
-            el.classList.remove('hide');
-            var childs = el.children[0].querySelectorAll('.child');
-
-            if (childs.length > 0) {
-              childs.forEach(function (el) {
-                if (_this.elementInViewport(el)) {
-                  el.classList.remove('hide');
-                }
-              });
-            }
-          }
-        });
-      }, 150);
+      }
     },
     resetFocus: function resetFocus(_ref) {
       var force = _ref.force;
@@ -703,18 +682,13 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
       }
     },
     elementInViewport: function elementInViewport(el) {
-      var width = el.offsetWidth;
-      var height = el.offsetHeight;
-      var top = el.offsetTop;
-      var left = el.offsetLeft;
-
-      while (el.offsetParent) {
-        el = el.offsetParent;
-        top += el.offsetTop;
-        left += el.offsetLeft;
-      }
-
-      return top + height >= window.pageYOffset && left >= window.pageXOffset && top + height / 3 <= window.pageYOffset + window.innerHeight && left + width / 2 <= window.pageXOffset + window.innerWidth;
+      // console.log(this.$el)
+      var container = this.$el;
+      var parentRect = container.getBoundingClientRect();
+      var childRect = el.getBoundingClientRect();
+      var hcheck = childRect.left + childRect.width >= parentRect.left && childRect.right - childRect.width / 2 <= parentRect.right;
+      var vcheck = childRect.top + childRect.height >= parentRect.top && childRect.bottom - childRect.height <= parentRect.bottom;
+      return hcheck && vcheck;
     },
     onSettledFunction: function onSettledFunction(arg) {
       if (this.ready && this.onSettled) {
@@ -723,7 +697,19 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
     }
   },
   updated: function updated() {
-    this.handleFocusLost();
+    var _this = this;
+
+    this.handleFocusLost(); // hide Elements in the dom
+
+    setTimeout(function () {
+      _this.$refs.childItem.forEach(function (el) {
+        if (!_this.elementInViewport(el)) {
+          el.classList.add("hide");
+        } else {
+          el.classList.remove("hide");
+        }
+      });
+    }, 250);
   },
   mounted: function mounted() {
     var _this2 = this,
@@ -731,15 +717,24 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
 
     this.setInitialvalue();
     var KEYS = this.getKeysByOrientation(this.orientation);
+    var KEYSLR = this.getKeysByOrientation(!this.orientation);
     enableNavigation((_enableNavigation = {
       id: "list-".concat(this.id)
-    }, _defineProperty(_enableNavigation, KEYS.REVERSE, function () {
+    }, _defineProperty(_enableNavigation, KEYSLR.REVERSE, function () {
+      if (_this2.orientation == 'VERTICAL' && !_this2.nested) {
+        _this2.onSettledFunction(KEYSLR.REVERSE);
+      }
+    }), _defineProperty(_enableNavigation, KEYSLR.FORWARD, function () {
+      if (_this2.orientation == 'VERTICAL' && !_this2.nested) {
+        _this2.onSettledFunction(KEYSLR.FORWARD);
+      }
+    }), _defineProperty(_enableNavigation, KEYS.REVERSE, function () {
       if (_this2.isPrevItemPresent()) {
         _this2.updateFocus("reverse");
 
         _this2.updateScrollValue();
       } else {
-        _this2.onSettledFunction('FIRST');
+        _this2.onSettledFunction(KEYS.REVERSE);
       }
     }), _defineProperty(_enableNavigation, KEYS.FORWARD, function () {
       if (_this2.isNextItemPresent()) {
@@ -747,7 +742,7 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
 
         _this2.updateScrollValue();
       } else {
-        _this2.onSettledFunction('LAST');
+        _this2.onSettledFunction(KEYS.FORWARD);
       }
     }), _defineProperty(_enableNavigation, "preCondition", function preCondition() {
       return _this2.isFocused && !_this2.disabled;
@@ -772,11 +767,13 @@ var __vue_render__$1 = function __vue_render__() {
 
   var _c = _vm._self._c || _h;
 
-  return _c('div', [_vm._ssrNode((_vm.title ? "<h3 data-v-d6e3a254>" + _vm._ssrEscape(_vm._s(_vm.title)) + "</h3>" : "<!---->") + " "), _vm._ssrNode("<div" + _vm._ssrClass("list", {
+  return _c('div', {
+    staticClass: "focusableList"
+  }, [_vm._ssrNode((_vm.title ? "<h3 data-v-bf74ef1a>" + _vm._ssrEscape(_vm._s(_vm.title)) + "</h3>" : "<!---->") + " "), _vm._ssrNode("<div" + _vm._ssrClass("list", {
     focus: _vm.isFocused,
     vertical: _vm.orientation === 'VERTICAL'
-  }) + _vm._ssrStyle(null, _vm.style, null) + " data-v-d6e3a254>", "</div>", _vm._l(_vm.items, function (item, index) {
-    return _vm._ssrNode("<div class=\"child\" data-v-d6e3a254>", "</div>", [_c(_vm.child, _vm._b({
+  }) + _vm._ssrStyle(null, _vm.style, null) + " data-v-bf74ef1a>", "</div>", _vm._l(_vm.items, function (item, index) {
+    return _vm._ssrNode("<div class=\"child\" data-v-bf74ef1a>", "</div>", [_c(_vm.child, _vm._b({
       tag: "component",
       class: {
         disabled: _vm.disabledIndex.includes(index)
@@ -795,8 +792,8 @@ var __vue_staticRenderFns__$1 = [];
 
 var __vue_inject_styles__$1 = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-d6e3a254_0", {
-    source: "h3[data-v-d6e3a254]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-d6e3a254]{display:flex;transition:all .15s ease;position:relative}.child[data-v-d6e3a254]{display:flex;transition:opacity .2s ease}.hide[data-v-d6e3a254]{opacity:0}.vertical[data-v-d6e3a254]{flex-direction:column}.disabled[data-v-d6e3a254]{background:grey}",
+  inject("data-v-bf74ef1a_0", {
+    source: ".focusableList[data-v-bf74ef1a]{height:100%;width:100%}h3[data-v-bf74ef1a]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-bf74ef1a]{display:flex;transition:all .15s ease;position:relative}.child[data-v-bf74ef1a]{display:flex;transition:opacity .15s ease}.hide[data-v-bf74ef1a]{opacity:0}.vertical[data-v-bf74ef1a]{flex-direction:column}.disabled[data-v-bf74ef1a]{background:grey}",
     map: undefined,
     media: undefined
   });
@@ -804,10 +801,10 @@ var __vue_inject_styles__$1 = function __vue_inject_styles__(inject) {
 /* scoped */
 
 
-var __vue_scope_id__$1 = "data-v-d6e3a254";
+var __vue_scope_id__$1 = "data-v-bf74ef1a";
 /* module identifier */
 
-var __vue_module_identifier__$1 = "data-v-d6e3a254";
+var __vue_module_identifier__$1 = "data-v-bf74ef1a";
 /* functional template */
 
 var __vue_is_functional_template__$1 = false;
@@ -816,7 +813,7 @@ var __vue_is_functional_template__$1 = false;
 var __vue_component__$1 = /*#__PURE__*/normalizeComponent({
   render: __vue_render__$1,
   staticRenderFns: __vue_staticRenderFns__$1
-}, __vue_inject_styles__$1, __vue_script__$1, __vue_scope_id__$1, __vue_is_functional_template__$1, __vue_module_identifier__$1, false, undefined, createInjectorSSR, undefined);var components=/*#__PURE__*/Object.freeze({__proto__:null,FocusableList: __vue_component__$1,Grid: __vue_component__});var install = function installVueSpatialNavigation(Vue) {
+}, __vue_inject_styles__$1, __vue_script__$1, __vue_scope_id__$1, __vue_is_functional_template__$1, __vue_module_identifier__$1, false, undefined, createInjectorSSR, undefined);var components=/*#__PURE__*/Object.freeze({__proto__:null,FocusableList: __vue_component__$1,FocusableGrid: __vue_component__});var install = function installVueSpatialNavigation(Vue) {
   if (install.installed) return;
   install.installed = true;
   Object.entries(components).forEach(function (_ref) {
@@ -850,4 +847,4 @@ var plugin = {
     GlobalVue.use(plugin);
   }
 } // Default export is library as a whole, registered via Vue.use()
-exports.FocusableList=__vue_component__$1;exports.Grid=__vue_component__;exports.default=plugin;
+exports.FocusableGrid=__vue_component__;exports.FocusableList=__vue_component__$1;exports.default=plugin;

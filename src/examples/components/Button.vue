@@ -1,12 +1,28 @@
 <template>
-  <div class="button" v-bind:class="{ focus: isFocused, disabled }">
+  <router-link v-if="path" class="button" v-bind:class="{ focus: isFocused, disabled }" :to="path">
     {{ title }}
-  </div>
+  </router-link>
+  <button v-else class="button" @click="goTo(path)" v-bind:class="{ focus: isFocused, disabled }">
+    {{ title }}
+  </button>
 </template>
 
 <script>
 export default {
-  props: ["title", "isFocused", "disabled"],
+  props: ["title", "isFocused", "disabled","path"],
+  methods:{
+    goTo(path){
+      console.log(path);
+      location.href = path;
+    }
+  },
+  watch:{
+    isFocused(val){
+      if(val){
+        this.$el.focus();
+      }
+    }
+  }
 };
 </script>
 
@@ -17,6 +33,7 @@ export default {
   font-size: 24px;
   width: fit-content;
   white-space: nowrap;
+  text-decoration: none;
 }
 .focus {
   background: #ff005e;

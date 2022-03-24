@@ -8,32 +8,32 @@ import GridExample from "@/examples/collections/GridExample";
 Vue.use(Router);
 
 export const routes = [
-  {
-    path: "/list",    
-    displayName: "List",
-    component: ListExample,
-  },
-  {
-    path: "/listdisabled",    
-    displayName: "List with disabled items",
-    component: ListDisabledExample,
-  },
-  {
-    path: "/carousel",    
-    displayName: "Carousel",
-    component: CarouselExample,
-  },
+  // {
+  //   path: "/list",    
+  //   title: "List",
+  //   component: ListExample,
+  // },
+  // {
+  //   path: "/listdisabled",    
+  //   title: "List with disabled items",
+  //   component: ListDisabledExample,
+  // },
+  // {
+  //   path: "/carousel",    
+  //   title: "Carousel",
+  //   component: CarouselExample,
+  // },
   {
     path: "/nestedcarousel",    
-    displayName: "Nested Carousel",
+    title: "Nested Carousel",
     component: NestedCarouselExample,
   },
   {
     path: "/grid",    
-    displayName: "Grid",
+    title: "Grid",
     component: GridExample,
   },
-  { path: '*', redirect: '/list' }
+  { path: '*', redirect: '/nestedcarousel' }
 ];
 export default new Router({
   mode: "history",

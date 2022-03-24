@@ -1,23 +1,25 @@
 <template>
-  <div
-    class="grid"
-    v-bind:class="{ focus: isFocused }"
-    ref="grid"
-    v-bind:style="style"
-  >
+  <div class="focusableGrid">
     <div
-      class="child"
-      v-bind:style="columns"
-      ref="childItem"
-      v-for="(item, index) in items"
-      :key="index"
+      class="grid"
+      v-bind:class="{ focus: isFocused }"
+      ref="grid"
+      v-bind:style="style"
     >
-      <component
-        :is="child"
-        v-bind="item"
-        :id="`child${item.id || index}`"
-        :isFocused="isFocused && index === focusedIndex"
-      />
+      <div
+        class="child"
+        v-bind:style="columns"
+        ref="childItem"
+        v-for="(item, index) in items"
+        :key="index"
+      >
+        <component
+          :is="child"
+          v-bind="item"
+          :id="`child${item.id || index}`"
+          :isFocused="isFocused && index === focusedIndex"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -27,6 +29,10 @@ import { enableNavigation, disableNavigation, focusHandler } from "@/event-bus";
 export default {
   name: "FocusableGrid",
   props: {
+		onSettled: {
+			type: Function,
+			required: false,
+		},
     child: {
       type: Object, //Child component (eg: card, button)
       required: true,
@@ -127,17 +133,6 @@ export default {
         this.$refs.childItem[this.focusedIndex],
         negative
       );
-
-      // hide Elements in the dom
-      setTimeout(()=>{
-        this.$refs.childItem.forEach((el)=>{
-          if(this.elementInViewport(el)){
-              el.classList.add('show');
-          } else{
-              el.classList.remove('show');
-          }
-        })
-      },150)
     },
     handleFocusLost() {
       if (this.focusedIndex > this.items.length - 1) {
@@ -153,65 +148,69 @@ export default {
       }
     },
     elementInViewport(el) {
-      const container = el.parentNode.parentNode;
-      var width = el.offsetWidth;
-      var height = el.offsetHeight;
-      var top = el.offsetTop;
-      var left = el.offsetLeft;
-
-      while(el.offsetParent) {
-        el = el.offsetParent;
-        top += el.offsetTop;
-        left += el.offsetLeft;
-      }
-      return (
-        (top + height) >= container.scrollTop &&
-        // left >= container.scrollLeft &&
-        (top + (height/2)) <= (container.scrollTop + container.offsetHeight)
-        // && (left - width) <= (container.scrollLeft + container.offsetWidth)
-      );
-    }
+      var container = this.$el;
+			var parentRect = container.getBoundingClientRect();
+			var childRect = el.getBoundingClientRect();
+      
+      // var hcheck = childRect.left + childRect.width >= parentRect.left && childRect.right - childRect.width / 2 <= parentRect.right;
+      var vcheck = childRect.top + childRect.height >= parentRect.top && childRect.bottom - childRect.height  <= parentRect.bottom;
+			return vcheck;
+    },
+    onSettledFunction(arg) {
+      if (this.onSettled) {
+				this.onSettled(arg);
+			}
+		},
   },
   updated() {
     this.handleFocusLost();
+    // hide Elements in the dom
+    setTimeout(()=>{
+      this.$refs.childItem.forEach((el)=>{
+        if(this.elementInViewport(el)){
+            el.classList.remove('hide');
+        } else{
+            el.classList.add('hide');
+        }
+      })
+    },200)
   },
   mounted() {
     enableNavigation({
       LEFT: () => {
         if (this.isPrevColumnPresent()) {
           this.updateColumn("reverse");
+        } else{
+          this.onSettledFunction('LEFT');
         }
       },
       RIGHT: () => {
         if (this.isNextColumnPresent()) {
           this.updateColumn();
+        } else{
+          this.onSettledFunction('RIGHT');
         }
       },
       UP: () => {
         if (this.isPrevRowPresent()) {
           this.updateRow("reverse");
           if (this.shouldScroll) this.updateScrollValue();
+        }else{
+          this.onSettledFunction('UP');
         }
       },
       DOWN: () => {
         if (this.isNextRowPresent()) {
           this.updateRow();
           if (this.shouldScroll) this.updateScrollValue("negative");
+        }else{
+          this.onSettledFunction('DOWN');
         }
       },
       preCondition: () => this.isFocused && !this.disabled,
       id: `grid-${this.id}`,
     });
     focusHandler.on("RESET_FOCUS", this.resetFocus);
-
-    // hide Elements in the dom
-    this.$refs.childItem.forEach((el)=>{
-        if(this.elementInViewport(el)){
-            el.classList.add('show');
-        } else{
-            el.classList.remove('show');
-        }
-    })
   },
   destroyed() {
     disableNavigation(`grid-${this.id}`);
@@ -221,6 +220,10 @@ export default {
 </script>
 
 <style lang="css" scoped>
+.focusableGrid{
+  width: 100%;
+  height: 100%;
+}
 .grid {
   display: flex;
   flex-wrap: wrap;
@@ -229,27 +232,12 @@ export default {
 }
 .child {
   display: flex;
-  visibility: hidden;
-  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.hide {
+	opacity: 0;
 }
 .vertical {
   flex-direction: column;
-}
-.show{
-  animation-name: show;
-  animation-duration: 0.2s;
-  animation-fill-mode: forwards;
-}
-.child:focus-within{
-  z-index: 20;
-}
-@keyframes show {
-  from{
-    visibility: hidden;
-  }
-  to{
-    visibility: visible;
-    opacity: 1;
-  }
 }
 </style>

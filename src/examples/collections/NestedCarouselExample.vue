@@ -1,12 +1,18 @@
 <template>
+<div class="content">
+
   <List
     :child="child"
-    :isFocused="true"
+    :isFocused="selected"
     :items="items"
     :shouldScroll="shouldScroll"
+    :nested="true"
     :onSettled="onFocusHandler"
     orientation="VERTICAL"
   />
+</div>
+<!-- <div>
+</div> -->
 </template>
 
 <script>
@@ -17,6 +23,11 @@ export default {
   components: {
     List,
   },
+  computed:{
+    selected(){
+      return this.$parent._data.focusElement === 'home'
+    }
+  },
   data() {
     return {
       items: [
@@ -24,56 +35,78 @@ export default {
           shouldScroll: true,
           title: 'Test1',
           child: Card,
-          onSettled: this.onFocusHandler,
+          onSettled: this.onChildSettled,
           items: gridData.map((item) => ({ items: item, width: '16vw'})),
         },
         {
-          child: Card,
           shouldScroll: true,
           title: 'Test1',
-          items: gridData.map((item) => ({ items: item, width: '16vw',})),
+          child: Card,
+          onSettled: this.onChildSettled,
+          items: gridData.map((item) => ({ items: item, width: '16vw'})),
         },
         {
-          child: Card,
           shouldScroll: true,
           title: 'Test1',
-          items: gridData.map((item) => ({ items: item, width: '16vw',})),
+          child: Card,
+          onSettled: this.onChildSettled,
+          items: gridData.map((item) => ({ items: item, width: '16vw'})),
         },
         {
-          child: Card,
           shouldScroll: true,
           title: 'Test1',
-          items: gridData.map((item) => ({ items: item, width: '16vw',})),
+          child: Card,
+          onSettled: this.onChildSettled,
+          items: gridData.map((item) => ({ items: item, width: '16vw'})),
         },
         {
-          child: Card,
           shouldScroll: true,
           title: 'Test1',
-          items: gridData.map((item) => ({ items: item, width: '16vw',})),
+          child: Card,
+          onSettled: this.onChildSettled,
+          items: gridData.map((item) => ({ items: item, width: '16vw'})),
         },
         {
-          child: Card,
           shouldScroll: true,
           title: 'Test1',
-          items: gridData.map((item) => ({ items: item, width: '16vw',})),
+          child: Card,
+          onSettled: this.onChildSettled,
+          items: gridData.map((item) => ({ items: item, width: '16vw'})),
         },
         {
-          child: Card,
           shouldScroll: true,
           title: 'Test1',
-          items: gridData.map((item) => ({ items: item, width: '16vw',})),
+          child: Card,
+          onSettled: this.onChildSettled,
+          items: gridData.map((item) => ({ items: item, width: '16vw'})),
         },
         {
-          child: Card,
           shouldScroll: true,
           title: 'Test1',
-          items: gridData.map((item) => ({ items: item, width: '16vw',})),
+          child: Card,
+          onSettled: this.onChildSettled,
+          items: gridData.map((item) => ({ items: item, width: '16vw'})),
         },
         {
-          child: Card,
           shouldScroll: true,
           title: 'Test1',
-          items: gridData.map((item) => ({ items: item, width: '16vw',})),
+          child: Card,
+          onSettled: this.onChildSettled,
+          items: gridData.map((item) => ({ items: item, width: '16vw'})),
+        },
+        {
+          shouldScroll: true,
+          title: 'Test1',
+          child: Card,
+          onSettled: this.onChildSettled,
+          items: gridData.map((item) => ({ items: item, width: '16vw'})),
+        },
+        {
+          shouldScroll: true,
+          title: 'Test1',
+          child: Card,
+          onSettled: this.onChildSettled,
+          items: gridData.map((item) => ({ items: item, width: '16vw'})),
         },
       ],
       child: List,
@@ -82,13 +115,25 @@ export default {
   },
   methods:{
     onFocusHandler(data){
-      console.log(data);
+      console.log('parent',data);
+    },
+    onChildSettled(data){
+      // console.log('Child',data);
+      if(data == 'LEFT'){
+        this.$parent._data.focusElement = 'menu'
+      }
     }
+  },
+  mounted(){
+    // console.log(this.$parent._data.focusElement)
   }
 };
 </script>
 
 <style lang="css">
+.content{
+  height: 100%;
+}
 .focus {
   z-index: 1;
 }

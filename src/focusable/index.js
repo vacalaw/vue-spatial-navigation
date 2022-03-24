@@ -1,4 +1,4 @@
-import Grid from './Grid.vue';
-import FocusableList from '../focusable/List.vue'
+import FocusableGrid from './Grid.vue';
+import FocusableList from './List.vue';
 
-export { FocusableList, Grid };
+export { FocusableList, FocusableGrid };

@@ -1,6 +1,13 @@
 <template>
   <div class="container">
     <SideNav />
+    <!-- <List
+      id="sidemenu"
+      :child="Button"
+      :isFocused="focusElement === 'menu'"
+      :items="items"
+      orientation="VERTICAL"
+    /> -->
     <div class="main-content">
       <router-view></router-view>
     </div>
@@ -9,15 +16,26 @@
 
 <script>
 import SideNav from "@/examples/SideNav";
-import {Grid} from '../../dist/vue-spatial-navigation.esm'
+import List from "@/focusable/List";
+import Button from "@/examples/components/Button";
+import { routes } from "@/examples/router";
+import {Grid} from '../../dist/vue-spatial-navigation.esm';
 export default {
   name: "App",
   components: {
     SideNav,
+    List
   },
   created(){
     // console.error(Grid)
-  }
+  },
+  data(){
+    return{
+      Button: Button,
+      items:routes,
+      focusElement:'home',
+    }
+  },
 };
 </script>
 
