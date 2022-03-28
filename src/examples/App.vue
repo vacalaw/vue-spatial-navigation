@@ -1,13 +1,6 @@
 <template>
   <div class="container">
     <SideNav />
-    <!-- <List
-      id="sidemenu"
-      :child="Button"
-      :isFocused="focusElement === 'menu'"
-      :items="items"
-      orientation="VERTICAL"
-    /> -->
     <div class="main-content">
       <router-view></router-view>
     </div>

@@ -102,6 +102,13 @@ var script = {
 
   },
   methods: {
+    showItem(index) {
+      // maxColumn
+      // return index >= this.focusedIndex && (index) < (this.maxColumn+this.focusedIndex+this.activeColumn)*this.maxColumn;
+      // return index >= this.focusedIndex && index <= this.maxColumn+this.focusedIndex-this.activeColumn && index <= this.focusedIndex+this.maxColumn;
+      return index >= this.activeRow * this.maxColumn && index <= this.focusedIndex + this.maxColumn * this.maxColumn - this.activeColumn + this.maxColumn - 1;
+    },
+
     getScrollAmount: (el, negative) => {
       if (el) {
         let value = el.clientHeight;
@@ -171,15 +178,6 @@ var script = {
       }
     },
 
-    elementInViewport(el) {
-      var container = this.$el;
-      var parentRect = container.getBoundingClientRect();
-      var childRect = el.getBoundingClientRect(); // var hcheck = childRect.left + childRect.width >= parentRect.left && childRect.right - childRect.width / 2 <= parentRect.right;
-
-      var vcheck = childRect.top + childRect.height >= parentRect.top && childRect.bottom - childRect.height <= parentRect.bottom;
-      return vcheck;
-    },
-
     onSettledFunction(arg) {
       if (this.onSettled) {
         this.onSettled(arg);
@@ -189,17 +187,7 @@ var script = {
   },
 
   updated() {
-    this.handleFocusLost(); // hide Elements in the dom
-
-    setTimeout(() => {
-      this.$refs.childItem.forEach(el => {
-        if (this.elementInViewport(el)) {
-          el.classList.remove('hide');
-        } else {
-          el.classList.add('hide');
-        }
-      });
-    }, 200);
+    this.handleFocusLost();
   },
 
   mounted() {
@@ -401,6 +389,9 @@ var __vue_render__ = function () {
       ref: "childItem",
       refInFor: true,
       staticClass: "child",
+      class: {
+        show: _vm.showItem(index)
+      },
       style: _vm.columns
     }, [_c(_vm.child, _vm._b({
       tag: "component",
@@ -417,8 +408,8 @@ var __vue_staticRenderFns__ = [];
 
 const __vue_inject_styles__ = function (inject) {
   if (!inject) return;
-  inject("data-v-8fa230a4_0", {
-    source: ".focusableGrid[data-v-8fa230a4]{width:100%;height:100%}.grid[data-v-8fa230a4]{display:flex;flex-wrap:wrap;position:relative;transition:top .15s ease}.child[data-v-8fa230a4]{display:flex;transition:opacity .15s ease}.hide[data-v-8fa230a4]{opacity:0}.vertical[data-v-8fa230a4]{flex-direction:column}",
+  inject("data-v-106e7718_0", {
+    source: ".focusableGrid[data-v-106e7718]{width:100%;height:100%}.grid[data-v-106e7718]{display:flex;flex-wrap:wrap;position:relative;transition:top .15s ease}.child[data-v-106e7718]{display:flex;transition:opacity .15s ease;opacity:0}.show[data-v-106e7718]{opacity:1;visibility:visible}.hide[data-v-106e7718]{opacity:0}.vertical[data-v-106e7718]{flex-direction:column}",
     map: undefined,
     media: undefined
   });
@@ -426,7 +417,7 @@ const __vue_inject_styles__ = function (inject) {
 /* scoped */
 
 
-const __vue_scope_id__ = "data-v-8fa230a4";
+const __vue_scope_id__ = "data-v-106e7718";
 /* module identifier */
 
 const __vue_module_identifier__ = undefined;
@@ -446,6 +437,10 @@ const __vue_component__ = /*#__PURE__*/normalizeComponent({
 var script$1 = {
   name: "focusableList",
   props: {
+    hideItems: {
+      type: Boolean,
+      default: false
+    },
     nested: {
       type: Boolean,
       default: false
@@ -500,6 +495,10 @@ var script$1 = {
       type: Boolean,
       default: false
     },
+    displayItems: {
+      type: Number,
+      default: 4
+    },
     id: {
       //unique id to differentiate navigation
       default: Math.random().toString()
@@ -516,11 +515,19 @@ var script$1 = {
 
   computed: {
     style() {
-      return (this.orientation === "VERTICAL" ? "top" : "left") + `: ${this.scrollAmount}px`;
+      return (this.orientation === "VERTICAL" ? "top" : "left") + `: ${this.scrollAmount}px;`;
     }
 
   },
   methods: {
+    showItem(index) {
+      if (this.hideItems) {
+        return index >= this.focusedIndex && index < +this.displayItems + this.focusedIndex;
+      }
+
+      return true;
+    },
+
     isEnabledIndex(index) {
       return !this.disabledIndex.includes(index);
     },
@@ -669,16 +676,6 @@ var script$1 = {
       }
     },
 
-    elementInViewport(el) {
-      // console.log(this.$el)
-      var container = this.$el;
-      var parentRect = container.getBoundingClientRect();
-      var childRect = el.getBoundingClientRect();
-      var hcheck = childRect.left + childRect.width >= parentRect.left && childRect.right - childRect.width / 2 <= parentRect.right;
-      var vcheck = childRect.top + childRect.height >= parentRect.top && childRect.bottom - childRect.height <= parentRect.bottom;
-      return hcheck && vcheck;
-    },
-
     onSettledFunction(arg) {
       if (this.ready && this.onSettled) {
         this.onSettled(arg);
@@ -688,17 +685,7 @@ var script$1 = {
   },
 
   updated() {
-    this.handleFocusLost(); // hide Elements in the dom
-
-    setTimeout(() => {
-      this.$refs.childItem.forEach(el => {
-        if (!this.elementInViewport(el)) {
-          el.classList.add("hide");
-        } else {
-          el.classList.remove("hide");
-        }
-      });
-    }, 250);
+    this.handleFocusLost();
   },
 
   mounted() {
@@ -708,12 +695,12 @@ var script$1 = {
     enableNavigation({
       id: `list-${this.id}`,
       [KEYSLR.REVERSE]: () => {
-        if (this.orientation == 'VERTICAL' && !this.nested) {
+        if (this.orientation == "VERTICAL" && !this.nested) {
           this.onSettledFunction(KEYSLR.REVERSE);
         }
       },
       [KEYSLR.FORWARD]: () => {
-        if (this.orientation == 'VERTICAL' && !this.nested) {
+        if (this.orientation == "VERTICAL" && !this.nested) {
           this.onSettledFunction(KEYSLR.FORWARD);
         }
       },
@@ -764,17 +751,25 @@ var __vue_render__$1 = function () {
   }, [_vm.title ? _c('h3', [_vm._v(_vm._s(_vm.title))]) : _vm._e(), _vm._v(" "), _c('div', {
     ref: "list",
     staticClass: "list",
-    class: {
-      focus: _vm.isFocused,
+    class: [{
+      focused: _vm.nested
+    }, {
       vertical: _vm.orientation === 'VERTICAL'
-    },
+    }],
     style: _vm.style
   }, _vm._l(_vm.items, function (item, index) {
     return _c('div', {
       key: index,
       ref: "childItem",
       refInFor: true,
-      staticClass: "child"
+      staticClass: "child",
+      class: [{
+        show: _vm.showItem(index)
+      }, {
+        focus: _vm.isFocused && index === _vm.focusedIndex
+      }, {
+        focused: index === _vm.focusedIndex
+      }]
     }, [_c(_vm.child, _vm._b({
       tag: "component",
       class: {
@@ -794,8 +789,8 @@ var __vue_staticRenderFns__$1 = [];
 
 const __vue_inject_styles__$1 = function (inject) {
   if (!inject) return;
-  inject("data-v-bf74ef1a_0", {
-    source: ".focusableList[data-v-bf74ef1a]{height:100%;width:100%}h3[data-v-bf74ef1a]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-bf74ef1a]{display:flex;transition:all .15s ease;position:relative}.child[data-v-bf74ef1a]{display:flex;transition:opacity .15s ease}.hide[data-v-bf74ef1a]{opacity:0}.vertical[data-v-bf74ef1a]{flex-direction:column}.disabled[data-v-bf74ef1a]{background:grey}",
+  inject("data-v-0b0d491a_0", {
+    source: ".focusableList[data-v-0b0d491a]{height:100%;width:100%}h3[data-v-0b0d491a]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-0b0d491a]{display:flex;transition:all .15s ease;position:relative}.child[data-v-0b0d491a]{display:flex;opacity:0;visibility:hidden;transition:opacity .15s ease}.show[data-v-0b0d491a]{opacity:1;visibility:visible}.vertical[data-v-0b0d491a]{flex-direction:column}.disabled[data-v-0b0d491a]{background:grey}",
     map: undefined,
     media: undefined
   });
@@ -803,7 +798,7 @@ const __vue_inject_styles__$1 = function (inject) {
 /* scoped */
 
 
-const __vue_scope_id__$1 = "data-v-bf74ef1a";
+const __vue_scope_id__$1 = "data-v-0b0d491a";
 /* module identifier */
 
 const __vue_module_identifier__$1 = undefined;

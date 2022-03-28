@@ -167,6 +167,12 @@ var script = {
     }
   },
   methods: {
+    showItem: function showItem(index) {
+      // maxColumn
+      // return index >= this.focusedIndex && (index) < (this.maxColumn+this.focusedIndex+this.activeColumn)*this.maxColumn;
+      // return index >= this.focusedIndex && index <= this.maxColumn+this.focusedIndex-this.activeColumn && index <= this.focusedIndex+this.maxColumn;
+      return index >= this.activeRow * this.maxColumn && index <= this.focusedIndex + this.maxColumn * this.maxColumn - this.activeColumn + this.maxColumn - 1;
+    },
     getScrollAmount: function getScrollAmount(el, negative) {
       if (el) {
         var value = el.clientHeight;
@@ -225,14 +231,6 @@ var script = {
         this.scrollAmount = 0;
       }
     },
-    elementInViewport: function elementInViewport(el) {
-      var container = this.$el;
-      var parentRect = container.getBoundingClientRect();
-      var childRect = el.getBoundingClientRect(); // var hcheck = childRect.left + childRect.width >= parentRect.left && childRect.right - childRect.width / 2 <= parentRect.right;
-
-      var vcheck = childRect.top + childRect.height >= parentRect.top && childRect.bottom - childRect.height <= parentRect.bottom;
-      return vcheck;
-    },
     onSettledFunction: function onSettledFunction(arg) {
       if (this.onSettled) {
         this.onSettled(arg);
@@ -240,58 +238,46 @@ var script = {
     }
   },
   updated: function updated() {
-    var _this = this;
-
-    this.handleFocusLost(); // hide Elements in the dom
-
-    setTimeout(function () {
-      _this.$refs.childItem.forEach(function (el) {
-        if (_this.elementInViewport(el)) {
-          el.classList.remove('hide');
-        } else {
-          el.classList.add('hide');
-        }
-      });
-    }, 200);
+    this.handleFocusLost();
   },
   mounted: function mounted() {
-    var _this2 = this;
+    var _this = this;
 
     enableNavigation({
       LEFT: function LEFT() {
-        if (_this2.isPrevColumnPresent()) {
-          _this2.updateColumn("reverse");
+        if (_this.isPrevColumnPresent()) {
+          _this.updateColumn("reverse");
         } else {
-          _this2.onSettledFunction('LEFT');
+          _this.onSettledFunction('LEFT');
         }
       },
       RIGHT: function RIGHT() {
-        if (_this2.isNextColumnPresent()) {
-          _this2.updateColumn();
+        if (_this.isNextColumnPresent()) {
+          _this.updateColumn();
         } else {
-          _this2.onSettledFunction('RIGHT');
+          _this.onSettledFunction('RIGHT');
         }
       },
       UP: function UP() {
-        if (_this2.isPrevRowPresent()) {
-          _this2.updateRow("reverse");
+        if (_this.isPrevRowPresent()) {
+          _this.updateRow("reverse");
 
-          if (_this2.shouldScroll) _this2.updateScrollValue();
+          if (_this.shouldScroll) _this.updateScrollValue();
         } else {
-          _this2.onSettledFunction('UP');
+          _this.onSettledFunction('UP');
         }
       },
       DOWN: function DOWN() {
-        if (_this2.isNextRowPresent()) {
-          _this2.updateRow();
+        if (_this.isNextRowPresent()) {
+          _this.updateRow();
 
-          if (_this2.shouldScroll) _this2.updateScrollValue("negative");
+          if (_this.shouldScroll) _this.updateScrollValue("negative");
         } else {
-          _this2.onSettledFunction('DOWN');
+          _this.onSettledFunction('DOWN');
         }
       },
       preCondition: function preCondition() {
-        return _this2.isFocused && !_this2.disabled;
+        return _this.isFocused && !_this.disabled;
       },
       id: "grid-".concat(this.id)
     });
@@ -429,8 +415,10 @@ var __vue_render__ = function __vue_render__() {
     staticClass: "focusableGrid"
   }, [_vm._ssrNode("<div" + _vm._ssrClass("grid", {
     focus: _vm.isFocused
-  }) + _vm._ssrStyle(null, _vm.style, null) + " data-v-8fa230a4>", "</div>", _vm._l(_vm.items, function (item, index) {
-    return _vm._ssrNode("<div class=\"child\"" + _vm._ssrStyle(null, _vm.columns, null) + " data-v-8fa230a4>", "</div>", [_c(_vm.child, _vm._b({
+  }) + _vm._ssrStyle(null, _vm.style, null) + " data-v-106e7718>", "</div>", _vm._l(_vm.items, function (item, index) {
+    return _vm._ssrNode("<div" + _vm._ssrClass("child", {
+      show: _vm.showItem(index)
+    }) + _vm._ssrStyle(null, _vm.columns, null) + " data-v-106e7718>", "</div>", [_c(_vm.child, _vm._b({
       tag: "component",
       attrs: {
         "id": "child" + (item.id || index),
@@ -445,8 +433,8 @@ var __vue_staticRenderFns__ = [];
 
 var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-8fa230a4_0", {
-    source: ".focusableGrid[data-v-8fa230a4]{width:100%;height:100%}.grid[data-v-8fa230a4]{display:flex;flex-wrap:wrap;position:relative;transition:top .15s ease}.child[data-v-8fa230a4]{display:flex;transition:opacity .15s ease}.hide[data-v-8fa230a4]{opacity:0}.vertical[data-v-8fa230a4]{flex-direction:column}",
+  inject("data-v-106e7718_0", {
+    source: ".focusableGrid[data-v-106e7718]{width:100%;height:100%}.grid[data-v-106e7718]{display:flex;flex-wrap:wrap;position:relative;transition:top .15s ease}.child[data-v-106e7718]{display:flex;transition:opacity .15s ease;opacity:0}.show[data-v-106e7718]{opacity:1;visibility:visible}.hide[data-v-106e7718]{opacity:0}.vertical[data-v-106e7718]{flex-direction:column}",
     map: undefined,
     media: undefined
   });
@@ -454,10 +442,10 @@ var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
 /* scoped */
 
 
-var __vue_scope_id__ = "data-v-8fa230a4";
+var __vue_scope_id__ = "data-v-106e7718";
 /* module identifier */
 
-var __vue_module_identifier__ = "data-v-8fa230a4";
+var __vue_module_identifier__ = "data-v-106e7718";
 /* functional template */
 
 var __vue_is_functional_template__ = false;
@@ -469,6 +457,10 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
 }, __vue_inject_styles__, __vue_script__, __vue_scope_id__, __vue_is_functional_template__, __vue_module_identifier__, false, undefined, createInjectorSSR, undefined);var script$1 = {
   name: "focusableList",
   props: {
+    hideItems: {
+      type: Boolean,
+      default: false
+    },
     nested: {
       type: Boolean,
       default: false
@@ -525,6 +517,10 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
       type: Boolean,
       default: false
     },
+    displayItems: {
+      type: Number,
+      default: 4
+    },
     id: {
       //unique id to differentiate navigation
       default: Math.random().toString()
@@ -539,10 +535,17 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
   },
   computed: {
     style: function style() {
-      return (this.orientation === "VERTICAL" ? "top" : "left") + ": ".concat(this.scrollAmount, "px");
+      return (this.orientation === "VERTICAL" ? "top" : "left") + ": ".concat(this.scrollAmount, "px;");
     }
   },
   methods: {
+    showItem: function showItem(index) {
+      if (this.hideItems) {
+        return index >= this.focusedIndex && index < +this.displayItems + this.focusedIndex;
+      }
+
+      return true;
+    },
     isEnabledIndex: function isEnabledIndex(index) {
       return !this.disabledIndex.includes(index);
     },
@@ -681,15 +684,6 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
         }
       }
     },
-    elementInViewport: function elementInViewport(el) {
-      // console.log(this.$el)
-      var container = this.$el;
-      var parentRect = container.getBoundingClientRect();
-      var childRect = el.getBoundingClientRect();
-      var hcheck = childRect.left + childRect.width >= parentRect.left && childRect.right - childRect.width / 2 <= parentRect.right;
-      var vcheck = childRect.top + childRect.height >= parentRect.top && childRect.bottom - childRect.height <= parentRect.bottom;
-      return hcheck && vcheck;
-    },
     onSettledFunction: function onSettledFunction(arg) {
       if (this.ready && this.onSettled) {
         this.onSettled(arg);
@@ -697,22 +691,10 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
     }
   },
   updated: function updated() {
-    var _this = this;
-
-    this.handleFocusLost(); // hide Elements in the dom
-
-    setTimeout(function () {
-      _this.$refs.childItem.forEach(function (el) {
-        if (!_this.elementInViewport(el)) {
-          el.classList.add("hide");
-        } else {
-          el.classList.remove("hide");
-        }
-      });
-    }, 250);
+    this.handleFocusLost();
   },
   mounted: function mounted() {
-    var _this2 = this,
+    var _this = this,
         _enableNavigation;
 
     this.setInitialvalue();
@@ -721,31 +703,31 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
     enableNavigation((_enableNavigation = {
       id: "list-".concat(this.id)
     }, _defineProperty(_enableNavigation, KEYSLR.REVERSE, function () {
-      if (_this2.orientation == 'VERTICAL' && !_this2.nested) {
-        _this2.onSettledFunction(KEYSLR.REVERSE);
+      if (_this.orientation == "VERTICAL" && !_this.nested) {
+        _this.onSettledFunction(KEYSLR.REVERSE);
       }
     }), _defineProperty(_enableNavigation, KEYSLR.FORWARD, function () {
-      if (_this2.orientation == 'VERTICAL' && !_this2.nested) {
-        _this2.onSettledFunction(KEYSLR.FORWARD);
+      if (_this.orientation == "VERTICAL" && !_this.nested) {
+        _this.onSettledFunction(KEYSLR.FORWARD);
       }
     }), _defineProperty(_enableNavigation, KEYS.REVERSE, function () {
-      if (_this2.isPrevItemPresent()) {
-        _this2.updateFocus("reverse");
+      if (_this.isPrevItemPresent()) {
+        _this.updateFocus("reverse");
 
-        _this2.updateScrollValue();
+        _this.updateScrollValue();
       } else {
-        _this2.onSettledFunction(KEYS.REVERSE);
+        _this.onSettledFunction(KEYS.REVERSE);
       }
     }), _defineProperty(_enableNavigation, KEYS.FORWARD, function () {
-      if (_this2.isNextItemPresent()) {
-        _this2.updateFocus();
+      if (_this.isNextItemPresent()) {
+        _this.updateFocus();
 
-        _this2.updateScrollValue();
+        _this.updateScrollValue();
       } else {
-        _this2.onSettledFunction(KEYS.FORWARD);
+        _this.onSettledFunction(KEYS.FORWARD);
       }
     }), _defineProperty(_enableNavigation, "preCondition", function preCondition() {
-      return _this2.isFocused && !_this2.disabled;
+      return _this.isFocused && !_this.disabled;
     }), _enableNavigation));
     focusHandler.on("RESET_FOCUS", this.resetFocus);
     focusHandler.on("SET_FOCUS", this.setExternalFocus);
@@ -769,11 +751,18 @@ var __vue_render__$1 = function __vue_render__() {
 
   return _c('div', {
     staticClass: "focusableList"
-  }, [_vm._ssrNode((_vm.title ? "<h3 data-v-bf74ef1a>" + _vm._ssrEscape(_vm._s(_vm.title)) + "</h3>" : "<!---->") + " "), _vm._ssrNode("<div" + _vm._ssrClass("list", {
-    focus: _vm.isFocused,
+  }, [_vm._ssrNode((_vm.title ? "<h3 data-v-0b0d491a>" + _vm._ssrEscape(_vm._s(_vm.title)) + "</h3>" : "<!---->") + " "), _vm._ssrNode("<div" + _vm._ssrClass("list", [{
+    focused: _vm.nested
+  }, {
     vertical: _vm.orientation === 'VERTICAL'
-  }) + _vm._ssrStyle(null, _vm.style, null) + " data-v-bf74ef1a>", "</div>", _vm._l(_vm.items, function (item, index) {
-    return _vm._ssrNode("<div class=\"child\" data-v-bf74ef1a>", "</div>", [_c(_vm.child, _vm._b({
+  }]) + _vm._ssrStyle(null, _vm.style, null) + " data-v-0b0d491a>", "</div>", _vm._l(_vm.items, function (item, index) {
+    return _vm._ssrNode("<div" + _vm._ssrClass("child", [{
+      show: _vm.showItem(index)
+    }, {
+      focus: _vm.isFocused && index === _vm.focusedIndex
+    }, {
+      focused: index === _vm.focusedIndex
+    }]) + " data-v-0b0d491a>", "</div>", [_c(_vm.child, _vm._b({
       tag: "component",
       class: {
         disabled: _vm.disabledIndex.includes(index)
@@ -792,8 +781,8 @@ var __vue_staticRenderFns__$1 = [];
 
 var __vue_inject_styles__$1 = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-bf74ef1a_0", {
-    source: ".focusableList[data-v-bf74ef1a]{height:100%;width:100%}h3[data-v-bf74ef1a]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-bf74ef1a]{display:flex;transition:all .15s ease;position:relative}.child[data-v-bf74ef1a]{display:flex;transition:opacity .15s ease}.hide[data-v-bf74ef1a]{opacity:0}.vertical[data-v-bf74ef1a]{flex-direction:column}.disabled[data-v-bf74ef1a]{background:grey}",
+  inject("data-v-0b0d491a_0", {
+    source: ".focusableList[data-v-0b0d491a]{height:100%;width:100%}h3[data-v-0b0d491a]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-0b0d491a]{display:flex;transition:all .15s ease;position:relative}.child[data-v-0b0d491a]{display:flex;opacity:0;visibility:hidden;transition:opacity .15s ease}.show[data-v-0b0d491a]{opacity:1;visibility:visible}.vertical[data-v-0b0d491a]{flex-direction:column}.disabled[data-v-0b0d491a]{background:grey}",
     map: undefined,
     media: undefined
   });
@@ -801,10 +790,10 @@ var __vue_inject_styles__$1 = function __vue_inject_styles__(inject) {
 /* scoped */
 
 
-var __vue_scope_id__$1 = "data-v-bf74ef1a";
+var __vue_scope_id__$1 = "data-v-0b0d491a";
 /* module identifier */
 
-var __vue_module_identifier__$1 = "data-v-bf74ef1a";
+var __vue_module_identifier__$1 = "data-v-0b0d491a";
 /* functional template */
 
 var __vue_is_functional_template__$1 = false;

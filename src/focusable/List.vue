@@ -3,12 +3,13 @@
 		<h3 v-if="title">{{ title }}</h3>
 		<div
 			class="list"
-			:class="{ focus: isFocused, vertical: orientation === 'VERTICAL' }"
+			:class="[{focused: nested},{vertical: orientation === 'VERTICAL' }]"
 			ref="list"
 			:style="style"
 		>
 			<div
 				class="child"
+				:class="[{show : showItem(index)} ,{ focus: isFocused && index === focusedIndex},{focused: index === focusedIndex}]"
 				ref="childItem"
 				v-for="(item, index) in items"
 				:key="index"
@@ -32,6 +33,10 @@ import { enableNavigation, disableNavigation, focusHandler } from "@/event-bus";
 export default {
 	name: "focusableList",
 	props: {
+		hideItems: {
+			type: Boolean,
+			default: false,
+		},
 		nested: {
 			type: Boolean,
 			default: false,
@@ -83,6 +88,10 @@ export default {
 			type: Boolean,
 			default: false,
 		},
+		displayItems: {
+			type: Number,
+			default: 4,
+		},
 		id: {
 			//unique id to differentiate navigation
 			default: Math.random().toString(),
@@ -98,12 +107,17 @@ export default {
 	computed: {
 		style() {
 			return (
-				(this.orientation === "VERTICAL" ? "top" : "left") +
-				`: ${this.scrollAmount}px`
+				(this.orientation === "VERTICAL" ? "top" : "left") + `: ${this.scrollAmount}px;`
 			);
 		},
 	},
 	methods: {
+		showItem(index){
+			if(this.hideItems){
+				return index >= this.focusedIndex && index < (+(this.displayItems)+this.focusedIndex);
+			}
+			return true;
+		},
 		isEnabledIndex(index) {
 			return !this.disabledIndex.includes(index);
 		},
@@ -249,16 +263,6 @@ export default {
 				}
 			}
 		},
-		elementInViewport(el) {
-      // console.log(this.$el)
-			var container = this.$el;
-			var parentRect = container.getBoundingClientRect();
-			var childRect = el.getBoundingClientRect();
-
-      var hcheck = childRect.left + childRect.width >= parentRect.left && childRect.right - childRect.width / 2 <= parentRect.right;
-      var vcheck = childRect.top + childRect.height >= parentRect.top && childRect.bottom - childRect.height  <= parentRect.bottom;
-			return hcheck && vcheck;
-		},
 		onSettledFunction(arg) {
 			if (this.ready && this.onSettled) {
 				this.onSettled(arg);
@@ -267,16 +271,6 @@ export default {
 	},
 	updated() {
 		this.handleFocusLost();
-    // hide Elements in the dom
-    setTimeout(() => {
-      this.$refs.childItem.forEach((el) => {
-        if (!this.elementInViewport(el)) {
-          el.classList.add("hide");
-        } else {
-          el.classList.remove("hide");
-        }
-      });
-    }, 250);
 	},
 	mounted() {
 		this.setInitialvalue();
@@ -284,16 +278,16 @@ export default {
 		let KEYSLR = this.getKeysByOrientation(!this.orientation);
 		enableNavigation({
 			id: `list-${this.id}`,
-      [KEYSLR.REVERSE]:()=>{
-        if(this.orientation == 'VERTICAL' && !this.nested){
-          this.onSettledFunction(KEYSLR.REVERSE)
-        }
-      },
-      [KEYSLR.FORWARD]:()=>{
-        if(this.orientation == 'VERTICAL' && !this.nested){
-          this.onSettledFunction(KEYSLR.FORWARD)
-        }
-      },
+			[KEYSLR.REVERSE]: () => {
+				if (this.orientation == "VERTICAL" && !this.nested) {
+					this.onSettledFunction(KEYSLR.REVERSE);
+				}
+			},
+			[KEYSLR.FORWARD]: () => {
+				if (this.orientation == "VERTICAL" && !this.nested) {
+					this.onSettledFunction(KEYSLR.FORWARD);
+				}
+			},
 			[KEYS.REVERSE]: () => {
 				if (this.isPrevItemPresent()) {
 					this.updateFocus("reverse");
@@ -327,8 +321,8 @@ export default {
 
 <style lang="css" scoped>
 .focusableList {
-  height: 100%;
-  width: 100%;
+	height: 100%;
+	width: 100%;
 }
 h3 {
 	color: #fff;
@@ -343,10 +337,14 @@ h3 {
 }
 .child {
 	display: flex;
+	opacity: 0;
+	visibility: hidden;
 	transition: opacity 0.15s ease;
 }
-.hide {
-	opacity: 0;
+
+.show{
+	opacity: 1;
+	visibility: visible;
 }
 .vertical {
 	flex-direction: column;

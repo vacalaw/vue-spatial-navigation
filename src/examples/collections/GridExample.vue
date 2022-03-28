@@ -5,7 +5,7 @@
     :items="items"
     :onSettled="onFocusHandler"
     :shouldScroll="true"
-    :maxColumn="4"
+    :maxColumn="3"
   />
 </template>
 

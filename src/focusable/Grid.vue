@@ -8,6 +8,7 @@
     >
       <div
         class="child"
+        :class="{show: showItem(index)}"
         v-bind:style="columns"
         ref="childItem"
         v-for="(item, index) in items"
@@ -84,6 +85,12 @@ export default {
     },
   },
   methods: {
+		showItem(index){
+      // maxColumn
+				// return index >= this.focusedIndex && (index) < (this.maxColumn+this.focusedIndex+this.activeColumn)*this.maxColumn;
+				// return index >= this.focusedIndex && index <= this.maxColumn+this.focusedIndex-this.activeColumn && index <= this.focusedIndex+this.maxColumn;
+				return index >= (this.activeRow*this.maxColumn) && index <= (this.focusedIndex+(this.maxColumn*this.maxColumn)-(this.activeColumn)+this.maxColumn)-1;
+		},
     getScrollAmount: (el, negative) => {
       if (el) {
         let value = el.clientHeight;
@@ -147,15 +154,6 @@ export default {
         this.scrollAmount = 0;
       }
     },
-    elementInViewport(el) {
-      var container = this.$el;
-			var parentRect = container.getBoundingClientRect();
-			var childRect = el.getBoundingClientRect();
-      
-      // var hcheck = childRect.left + childRect.width >= parentRect.left && childRect.right - childRect.width / 2 <= parentRect.right;
-      var vcheck = childRect.top + childRect.height >= parentRect.top && childRect.bottom - childRect.height  <= parentRect.bottom;
-			return vcheck;
-    },
     onSettledFunction(arg) {
       if (this.onSettled) {
 				this.onSettled(arg);
@@ -164,16 +162,6 @@ export default {
   },
   updated() {
     this.handleFocusLost();
-    // hide Elements in the dom
-    setTimeout(()=>{
-      this.$refs.childItem.forEach((el)=>{
-        if(this.elementInViewport(el)){
-            el.classList.remove('hide');
-        } else{
-            el.classList.add('hide');
-        }
-      })
-    },200)
   },
   mounted() {
     enableNavigation({
@@ -233,6 +221,11 @@ export default {
 .child {
   display: flex;
   transition: opacity 0.15s ease;
+  opacity: 0;
+}
+.show{
+  opacity: 1;
+  visibility: visible;
 }
 .hide {
 	opacity: 0;

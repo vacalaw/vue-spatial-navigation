@@ -7,6 +7,7 @@
     :items="items"
     :shouldScroll="shouldScroll"
     :nested="true"
+    :hideItems="true"
     :onSettled="onFocusHandler"
     orientation="VERTICAL"
   />
@@ -35,77 +36,18 @@ export default {
           shouldScroll: true,
           title: 'Test1',
           child: Card,
+          hideItems: true,
           onSettled: this.onChildSettled,
+          displayItems:5,
           items: gridData.map((item) => ({ items: item, width: '16vw'})),
         },
         {
           shouldScroll: true,
           title: 'Test1',
           child: Card,
+          hideItems: true,
           onSettled: this.onChildSettled,
-          items: gridData.map((item) => ({ items: item, width: '16vw'})),
-        },
-        {
-          shouldScroll: true,
-          title: 'Test1',
-          child: Card,
-          onSettled: this.onChildSettled,
-          items: gridData.map((item) => ({ items: item, width: '16vw'})),
-        },
-        {
-          shouldScroll: true,
-          title: 'Test1',
-          child: Card,
-          onSettled: this.onChildSettled,
-          items: gridData.map((item) => ({ items: item, width: '16vw'})),
-        },
-        {
-          shouldScroll: true,
-          title: 'Test1',
-          child: Card,
-          onSettled: this.onChildSettled,
-          items: gridData.map((item) => ({ items: item, width: '16vw'})),
-        },
-        {
-          shouldScroll: true,
-          title: 'Test1',
-          child: Card,
-          onSettled: this.onChildSettled,
-          items: gridData.map((item) => ({ items: item, width: '16vw'})),
-        },
-        {
-          shouldScroll: true,
-          title: 'Test1',
-          child: Card,
-          onSettled: this.onChildSettled,
-          items: gridData.map((item) => ({ items: item, width: '16vw'})),
-        },
-        {
-          shouldScroll: true,
-          title: 'Test1',
-          child: Card,
-          onSettled: this.onChildSettled,
-          items: gridData.map((item) => ({ items: item, width: '16vw'})),
-        },
-        {
-          shouldScroll: true,
-          title: 'Test1',
-          child: Card,
-          onSettled: this.onChildSettled,
-          items: gridData.map((item) => ({ items: item, width: '16vw'})),
-        },
-        {
-          shouldScroll: true,
-          title: 'Test1',
-          child: Card,
-          onSettled: this.onChildSettled,
-          items: gridData.map((item) => ({ items: item, width: '16vw'})),
-        },
-        {
-          shouldScroll: true,
-          title: 'Test1',
-          child: Card,
-          onSettled: this.onChildSettled,
+          displayItems:5,
           items: gridData.map((item) => ({ items: item, width: '16vw'})),
         },
       ],
