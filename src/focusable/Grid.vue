@@ -1,27 +1,21 @@
 <template>
   <div class="focusableGrid">
-    <div
-      class="grid"
-      v-bind:class="{ focus: isFocused }"
-      ref="grid"
-      v-bind:style="style"
-    >
-      <div
-        class="child"
-        :class="{show: showItem(index)}"
-        v-bind:style="columns"
-        ref="childItem"
-        v-for="(item, index) in items"
-        :key="index"
-      >
-        <component
-          :is="child"
-          v-bind="item"
-          :id="`child${item.id || index}`"
-          :isFocused="isFocused && index === focusedIndex"
-        />
-      </div>
-    </div>
+    <transition-group ref="grid" :class="{ focus: isFocused }" name="list" class="grid" tag="div">
+        <div
+          class="child" 
+          :style="columns"
+          ref="childItem"
+          v-for="(item, index) in filteredItems"
+          :key="item.id"
+        >
+          <component
+            :is="child"
+            v-bind="item"
+            :id="`child${item.id || index}`"
+            :isFocused="isFocused && index === activeColumn"
+          />
+        </div>
+    </transition-group>
   </div>
 </template>
 
@@ -72,24 +66,31 @@ export default {
       scrollAmount: 0,
       activeRow: 0,
       activeColumn: 0,
+      width: 0,
     };
   },
   computed: {
     columns(){
-      return {width: `${100 / this.maxColumn}%`}
+      return {
+        width: `${100 / this.maxColumn}%`,
+        height: `${(this.width / this.maxColumn)/16*9}px`
+      }
     },
     style() {
       return {
         top: `${this.scrollAmount}px`,
       };
     },
+    filteredItems(){
+			return this.items.filter((item,index)=> this.showItem(item, index));
+		},
   },
   methods: {
-		showItem(index){
-      // maxColumn
-				// return index >= this.focusedIndex && (index) < (this.maxColumn+this.focusedIndex+this.activeColumn)*this.maxColumn;
-				// return index >= this.focusedIndex && index <= this.maxColumn+this.focusedIndex-this.activeColumn && index <= this.focusedIndex+this.maxColumn;
-				return index >= (this.activeRow*this.maxColumn) && index <= (this.focusedIndex+(this.maxColumn*this.maxColumn)-(this.activeColumn)+this.maxColumn)-1;
+    showItem(item, index) {
+			if(index >= this.activeRow * this.maxColumn && index <= this.focusedIndex + this.maxColumn * this.maxColumn - this.activeColumn + this.maxColumn - 1){
+				return item;
+			}
+			return false;
 		},
     getScrollAmount: (el, negative) => {
       if (el) {
@@ -159,11 +160,27 @@ export default {
 				this.onSettled(arg);
 			}
 		},
+		onMainScrollWeel(element){
+			element.preventDefault();
+			if(!this.isKeyPress){
+				if(element.deltaY < 0 || element.deltaY > 0){
+					if(element.deltaY > 0  && this.isNextRowPresent()){
+						this.updateRow();
+						this.updateScrollValue('negative');
+					} else if (element.deltaY < 0 && this.isPrevRowPresent()){
+						this.updateRow('reverse')
+						this.updateScrollValue();
+					}
+				}
+			}
+		}
   },
   updated() {
     this.handleFocusLost();
   },
   mounted() {
+    this.width = this.$el.clientWidth;
+		this.$el.addEventListener("wheel", this.onMainScrollWeel);
     enableNavigation({
       LEFT: () => {
         if (this.isPrevColumnPresent()) {
@@ -201,6 +218,7 @@ export default {
     focusHandler.on("RESET_FOCUS", this.resetFocus);
   },
   destroyed() {
+		this.$el.removeEventListener("wheel", this.onMainScrollWeel);
     disableNavigation(`grid-${this.id}`);
     focusHandler.off("RESET_FOCUS", this.resetFocus);
   },
@@ -214,23 +232,24 @@ export default {
 }
 .grid {
   display: flex;
-  flex-wrap: wrap;
-  position: relative;
-  transition: top 0.15s ease;
+	height: 100%;
+	flex-wrap: wrap;
+	align-content: flex-start;
+	position: relative;
 }
 .child {
   display: flex;
-  transition: opacity 0.15s ease;
-  opacity: 0;
+  align-items: stretch;
 }
-.show{
-  opacity: 1;
-  visibility: visible;
+.list-enter-active, .list-leave-active {
+  transition: all .15s ease;
 }
-.hide {
-	opacity: 0;
+.list-enter, .list-leave-to /* .list-leave-active below version 2.1.8 */ {
+  height: 0!important;
+  z-index: 10;
+  border-color: transparent;
 }
-.vertical {
-  flex-direction: column;
+.list-leave-to .focus{
+  border-color: transparent;
 }
 </style>

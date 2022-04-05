@@ -25,7 +25,7 @@ export default {
   },
   data() {
     return {
-      items: gridData.map((item) => ({ items: item, width:'100%' })),
+      items: gridData.map((item) => ({ items: item, id: Math.random().toString(), width:'100%' })),
       Card: Card,
     };
   },

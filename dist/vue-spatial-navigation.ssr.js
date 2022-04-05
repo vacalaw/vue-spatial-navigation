@@ -151,27 +151,37 @@ var script = {
       focusedIndex: 0,
       scrollAmount: 0,
       activeRow: 0,
-      activeColumn: 0
+      activeColumn: 0,
+      width: 0
     };
   },
   computed: {
     columns: function columns() {
       return {
-        width: "".concat(100 / this.maxColumn, "%")
+        width: "".concat(100 / this.maxColumn, "%"),
+        height: "".concat(this.width / this.maxColumn / 16 * 9, "px")
       };
     },
     style: function style() {
       return {
         top: "".concat(this.scrollAmount, "px")
       };
+    },
+    filteredItems: function filteredItems() {
+      var _this = this;
+
+      return this.items.filter(function (item, index) {
+        return _this.showItem(item, index);
+      });
     }
   },
   methods: {
-    showItem: function showItem(index) {
-      // maxColumn
-      // return index >= this.focusedIndex && (index) < (this.maxColumn+this.focusedIndex+this.activeColumn)*this.maxColumn;
-      // return index >= this.focusedIndex && index <= this.maxColumn+this.focusedIndex-this.activeColumn && index <= this.focusedIndex+this.maxColumn;
-      return index >= this.activeRow * this.maxColumn && index <= this.focusedIndex + this.maxColumn * this.maxColumn - this.activeColumn + this.maxColumn - 1;
+    showItem: function showItem(item, index) {
+      if (index >= this.activeRow * this.maxColumn && index <= this.focusedIndex + this.maxColumn * this.maxColumn - this.activeColumn + this.maxColumn - 1) {
+        return item;
+      }
+
+      return false;
     },
     getScrollAmount: function getScrollAmount(el, negative) {
       if (el) {
@@ -235,55 +245,73 @@ var script = {
       if (this.onSettled) {
         this.onSettled(arg);
       }
+    },
+    onMainScrollWeel: function onMainScrollWeel(element) {
+      element.preventDefault();
+
+      if (!this.isKeyPress) {
+        if (element.deltaY < 0 || element.deltaY > 0) {
+          if (element.deltaY > 0 && this.isNextRowPresent()) {
+            this.updateRow();
+            this.updateScrollValue('negative');
+          } else if (element.deltaY < 0 && this.isPrevRowPresent()) {
+            this.updateRow('reverse');
+            this.updateScrollValue();
+          }
+        }
+      }
     }
   },
   updated: function updated() {
     this.handleFocusLost();
   },
   mounted: function mounted() {
-    var _this = this;
+    var _this2 = this;
 
+    this.width = this.$el.clientWidth;
+    this.$el.addEventListener("wheel", this.onMainScrollWeel);
     enableNavigation({
       LEFT: function LEFT() {
-        if (_this.isPrevColumnPresent()) {
-          _this.updateColumn("reverse");
+        if (_this2.isPrevColumnPresent()) {
+          _this2.updateColumn("reverse");
         } else {
-          _this.onSettledFunction('LEFT');
+          _this2.onSettledFunction('LEFT');
         }
       },
       RIGHT: function RIGHT() {
-        if (_this.isNextColumnPresent()) {
-          _this.updateColumn();
+        if (_this2.isNextColumnPresent()) {
+          _this2.updateColumn();
         } else {
-          _this.onSettledFunction('RIGHT');
+          _this2.onSettledFunction('RIGHT');
         }
       },
       UP: function UP() {
-        if (_this.isPrevRowPresent()) {
-          _this.updateRow("reverse");
+        if (_this2.isPrevRowPresent()) {
+          _this2.updateRow("reverse");
 
-          if (_this.shouldScroll) _this.updateScrollValue();
+          if (_this2.shouldScroll) _this2.updateScrollValue();
         } else {
-          _this.onSettledFunction('UP');
+          _this2.onSettledFunction('UP');
         }
       },
       DOWN: function DOWN() {
-        if (_this.isNextRowPresent()) {
-          _this.updateRow();
+        if (_this2.isNextRowPresent()) {
+          _this2.updateRow();
 
-          if (_this.shouldScroll) _this.updateScrollValue("negative");
+          if (_this2.shouldScroll) _this2.updateScrollValue("negative");
         } else {
-          _this.onSettledFunction('DOWN');
+          _this2.onSettledFunction('DOWN');
         }
       },
       preCondition: function preCondition() {
-        return _this.isFocused && !_this.disabled;
+        return _this2.isFocused && !_this2.disabled;
       },
       id: "grid-".concat(this.id)
     });
     focusHandler.on("RESET_FOCUS", this.resetFocus);
   },
   destroyed: function destroyed() {
+    this.$el.removeEventListener("wheel", this.onMainScrollWeel);
     disableNavigation("grid-".concat(this.id));
     focusHandler.off("RESET_FOCUS", this.resetFocus);
   }
@@ -413,19 +441,31 @@ var __vue_render__ = function __vue_render__() {
 
   return _c('div', {
     staticClass: "focusableGrid"
-  }, [_vm._ssrNode("<div" + _vm._ssrClass("grid", {
-    focus: _vm.isFocused
-  }) + _vm._ssrStyle(null, _vm.style, null) + " data-v-106e7718>", "</div>", _vm._l(_vm.items, function (item, index) {
-    return _vm._ssrNode("<div" + _vm._ssrClass("child", {
-      show: _vm.showItem(index)
-    }) + _vm._ssrStyle(null, _vm.columns, null) + " data-v-106e7718>", "</div>", [_c(_vm.child, _vm._b({
+  }, [_c('transition-group', {
+    ref: "grid",
+    staticClass: "grid",
+    class: {
+      focus: _vm.isFocused
+    },
+    attrs: {
+      "name": "list",
+      "tag": "div"
+    }
+  }, _vm._l(_vm.filteredItems, function (item, index) {
+    return _c('div', {
+      key: item.id,
+      ref: "childItem",
+      refInFor: true,
+      staticClass: "child",
+      style: _vm.columns
+    }, [_c(_vm.child, _vm._b({
       tag: "component",
       attrs: {
         "id": "child" + (item.id || index),
-        "isFocused": _vm.isFocused && index === _vm.focusedIndex
+        "isFocused": _vm.isFocused && index === _vm.activeColumn
       }
     }, 'component', item, false))], 1);
-  }), 0)]);
+  }), 0)], 1);
 };
 
 var __vue_staticRenderFns__ = [];
@@ -433,8 +473,8 @@ var __vue_staticRenderFns__ = [];
 
 var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-106e7718_0", {
-    source: ".focusableGrid[data-v-106e7718]{width:100%;height:100%}.grid[data-v-106e7718]{display:flex;flex-wrap:wrap;position:relative;transition:top .15s ease}.child[data-v-106e7718]{display:flex;transition:opacity .15s ease;opacity:0}.show[data-v-106e7718]{opacity:1;visibility:visible}.hide[data-v-106e7718]{opacity:0}.vertical[data-v-106e7718]{flex-direction:column}",
+  inject("data-v-14172eab_0", {
+    source: ".focusableGrid[data-v-14172eab]{width:100%;height:100%}.grid[data-v-14172eab]{display:flex;height:100%;flex-wrap:wrap;align-content:flex-start;position:relative}.child[data-v-14172eab]{display:flex;align-items:stretch}.list-enter-active[data-v-14172eab],.list-leave-active[data-v-14172eab]{transition:all .15s ease}.list-enter[data-v-14172eab],.list-leave-to[data-v-14172eab]{height:0!important;z-index:10;border-color:transparent}.list-leave-to .focus[data-v-14172eab]{border-color:transparent}",
     map: undefined,
     media: undefined
   });
@@ -442,10 +482,10 @@ var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
 /* scoped */
 
 
-var __vue_scope_id__ = "data-v-106e7718";
+var __vue_scope_id__ = "data-v-14172eab";
 /* module identifier */
 
-var __vue_module_identifier__ = "data-v-106e7718";
+var __vue_module_identifier__ = "data-v-14172eab";
 /* functional template */
 
 var __vue_is_functional_template__ = false;

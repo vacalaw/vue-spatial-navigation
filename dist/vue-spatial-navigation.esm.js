@@ -83,14 +83,16 @@ var script = {
       focusedIndex: 0,
       scrollAmount: 0,
       activeRow: 0,
-      activeColumn: 0
+      activeColumn: 0,
+      width: 0
     };
   },
 
   computed: {
     columns() {
       return {
-        width: `${100 / this.maxColumn}%`
+        width: `${100 / this.maxColumn}%`,
+        height: `${this.width / this.maxColumn / 16 * 9}px`
       };
     },
 
@@ -98,15 +100,20 @@ var script = {
       return {
         top: `${this.scrollAmount}px`
       };
+    },
+
+    filteredItems() {
+      return this.items.filter((item, index) => this.showItem(item, index));
     }
 
   },
   methods: {
-    showItem(index) {
-      // maxColumn
-      // return index >= this.focusedIndex && (index) < (this.maxColumn+this.focusedIndex+this.activeColumn)*this.maxColumn;
-      // return index >= this.focusedIndex && index <= this.maxColumn+this.focusedIndex-this.activeColumn && index <= this.focusedIndex+this.maxColumn;
-      return index >= this.activeRow * this.maxColumn && index <= this.focusedIndex + this.maxColumn * this.maxColumn - this.activeColumn + this.maxColumn - 1;
+    showItem(item, index) {
+      if (index >= this.activeRow * this.maxColumn && index <= this.focusedIndex + this.maxColumn * this.maxColumn - this.activeColumn + this.maxColumn - 1) {
+        return item;
+      }
+
+      return false;
     },
 
     getScrollAmount: (el, negative) => {
@@ -182,6 +189,22 @@ var script = {
       if (this.onSettled) {
         this.onSettled(arg);
       }
+    },
+
+    onMainScrollWeel(element) {
+      element.preventDefault();
+
+      if (!this.isKeyPress) {
+        if (element.deltaY < 0 || element.deltaY > 0) {
+          if (element.deltaY > 0 && this.isNextRowPresent()) {
+            this.updateRow();
+            this.updateScrollValue('negative');
+          } else if (element.deltaY < 0 && this.isPrevRowPresent()) {
+            this.updateRow('reverse');
+            this.updateScrollValue();
+          }
+        }
+      }
     }
 
   },
@@ -191,6 +214,8 @@ var script = {
   },
 
   mounted() {
+    this.width = this.$el.clientWidth;
+    this.$el.addEventListener("wheel", this.onMainScrollWeel);
     enableNavigation({
       LEFT: () => {
         if (this.isPrevColumnPresent()) {
@@ -229,6 +254,7 @@ var script = {
   },
 
   destroyed() {
+    this.$el.removeEventListener("wheel", this.onMainScrollWeel);
     disableNavigation(`grid-${this.id}`);
     focusHandler.off("RESET_FOCUS", this.resetFocus);
   }
@@ -376,31 +402,31 @@ var __vue_render__ = function () {
 
   return _c('div', {
     staticClass: "focusableGrid"
-  }, [_c('div', {
+  }, [_c('transition-group', {
     ref: "grid",
     staticClass: "grid",
     class: {
       focus: _vm.isFocused
     },
-    style: _vm.style
-  }, _vm._l(_vm.items, function (item, index) {
+    attrs: {
+      "name": "list",
+      "tag": "div"
+    }
+  }, _vm._l(_vm.filteredItems, function (item, index) {
     return _c('div', {
-      key: index,
+      key: item.id,
       ref: "childItem",
       refInFor: true,
       staticClass: "child",
-      class: {
-        show: _vm.showItem(index)
-      },
       style: _vm.columns
     }, [_c(_vm.child, _vm._b({
       tag: "component",
       attrs: {
         "id": "child" + (item.id || index),
-        "isFocused": _vm.isFocused && index === _vm.focusedIndex
+        "isFocused": _vm.isFocused && index === _vm.activeColumn
       }
     }, 'component', item, false))], 1);
-  }), 0)]);
+  }), 0)], 1);
 };
 
 var __vue_staticRenderFns__ = [];
@@ -408,8 +434,8 @@ var __vue_staticRenderFns__ = [];
 
 const __vue_inject_styles__ = function (inject) {
   if (!inject) return;
-  inject("data-v-106e7718_0", {
-    source: ".focusableGrid[data-v-106e7718]{width:100%;height:100%}.grid[data-v-106e7718]{display:flex;flex-wrap:wrap;position:relative;transition:top .15s ease}.child[data-v-106e7718]{display:flex;transition:opacity .15s ease;opacity:0}.show[data-v-106e7718]{opacity:1;visibility:visible}.hide[data-v-106e7718]{opacity:0}.vertical[data-v-106e7718]{flex-direction:column}",
+  inject("data-v-14172eab_0", {
+    source: ".focusableGrid[data-v-14172eab]{width:100%;height:100%}.grid[data-v-14172eab]{display:flex;height:100%;flex-wrap:wrap;align-content:flex-start;position:relative}.child[data-v-14172eab]{display:flex;align-items:stretch}.list-enter-active[data-v-14172eab],.list-leave-active[data-v-14172eab]{transition:all .15s ease}.list-enter[data-v-14172eab],.list-leave-to[data-v-14172eab]{height:0!important;z-index:10;border-color:transparent}.list-leave-to .focus[data-v-14172eab]{border-color:transparent}",
     map: undefined,
     media: undefined
   });
@@ -417,7 +443,7 @@ const __vue_inject_styles__ = function (inject) {
 /* scoped */
 
 
-const __vue_scope_id__ = "data-v-106e7718";
+const __vue_scope_id__ = "data-v-14172eab";
 /* module identifier */
 
 const __vue_module_identifier__ = undefined;
