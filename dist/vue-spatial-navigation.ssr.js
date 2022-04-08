@@ -575,12 +575,19 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
   },
   computed: {
     style: function style() {
-      return (this.orientation === "VERTICAL" ? "top" : "left") + ": ".concat(this.scrollAmount, "px;");
+      return this.hideItems ? "" : (this.orientation === "VERTICAL" ? "top" : "left") + ": ".concat(this.scrollAmount, "px;");
+    },
+    filterList: function filterList() {
+      var _this = this;
+
+      return this.items.filter(function (item, index) {
+        return _this.showItem(item, index);
+      });
     }
   },
   methods: {
-    showItem: function showItem(index) {
-      if (this.hideItems) {
+    showItem: function showItem(item, index) {
+      if (this.hideItems && this.nested) {
         return index >= this.focusedIndex && index < +this.displayItems + this.focusedIndex;
       }
 
@@ -734,7 +741,7 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
     this.handleFocusLost();
   },
   mounted: function mounted() {
-    var _this = this,
+    var _this2 = this,
         _enableNavigation;
 
     this.setInitialvalue();
@@ -743,31 +750,31 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
     enableNavigation((_enableNavigation = {
       id: "list-".concat(this.id)
     }, _defineProperty(_enableNavigation, KEYSLR.REVERSE, function () {
-      if (_this.orientation == "VERTICAL" && !_this.nested) {
-        _this.onSettledFunction(KEYSLR.REVERSE);
+      if (_this2.orientation == "VERTICAL" && !_this2.nested) {
+        _this2.onSettledFunction(KEYSLR.REVERSE);
       }
     }), _defineProperty(_enableNavigation, KEYSLR.FORWARD, function () {
-      if (_this.orientation == "VERTICAL" && !_this.nested) {
-        _this.onSettledFunction(KEYSLR.FORWARD);
+      if (_this2.orientation == "VERTICAL" && !_this2.nested) {
+        _this2.onSettledFunction(KEYSLR.FORWARD);
       }
     }), _defineProperty(_enableNavigation, KEYS.REVERSE, function () {
-      if (_this.isPrevItemPresent()) {
-        _this.updateFocus("reverse");
+      if (_this2.isPrevItemPresent()) {
+        _this2.updateFocus("reverse");
 
-        _this.updateScrollValue();
+        _this2.updateScrollValue();
       } else {
-        _this.onSettledFunction(KEYS.REVERSE);
+        _this2.onSettledFunction(KEYS.REVERSE);
       }
     }), _defineProperty(_enableNavigation, KEYS.FORWARD, function () {
-      if (_this.isNextItemPresent()) {
-        _this.updateFocus();
+      if (_this2.isNextItemPresent()) {
+        _this2.updateFocus();
 
-        _this.updateScrollValue();
+        _this2.updateScrollValue();
       } else {
-        _this.onSettledFunction(KEYS.FORWARD);
+        _this2.onSettledFunction(KEYS.FORWARD);
       }
     }), _defineProperty(_enableNavigation, "preCondition", function preCondition() {
-      return _this.isFocused && !_this.disabled;
+      return _this2.isFocused && !_this2.disabled;
     }), _enableNavigation));
     focusHandler.on("RESET_FOCUS", this.resetFocus);
     focusHandler.on("SET_FOCUS", this.setExternalFocus);
@@ -791,25 +798,36 @@ var __vue_render__$1 = function __vue_render__() {
 
   return _c('div', {
     staticClass: "focusableList"
-  }, [_vm._ssrNode((_vm.title ? "<h3 data-v-0b0d491a>" + _vm._ssrEscape(_vm._s(_vm.title)) + "</h3>" : "<!---->") + " "), _vm._ssrNode("<div" + _vm._ssrClass("list", [{
-    focused: _vm.nested
-  }, {
-    vertical: _vm.orientation === 'VERTICAL'
-  }]) + _vm._ssrStyle(null, _vm.style, null) + " data-v-0b0d491a>", "</div>", _vm._l(_vm.items, function (item, index) {
-    return _vm._ssrNode("<div" + _vm._ssrClass("child", [{
-      show: _vm.showItem(index)
-    }, {
-      focus: _vm.isFocused && index === _vm.focusedIndex
-    }, {
-      focused: index === _vm.focusedIndex
-    }]) + " data-v-0b0d491a>", "</div>", [_c(_vm.child, _vm._b({
+  }, [_vm._ssrNode((_vm.title ? "<h3 data-v-19c3b7e0>" + _vm._ssrEscape(_vm._s(_vm.title)) + "</h3>" : "<!---->") + " "), _c('transition-group', {
+    ref: "list",
+    staticClass: "list",
+    class: [{
+      vertical: _vm.orientation === 'VERTICAL'
+    }],
+    style: _vm.style,
+    attrs: {
+      "name": _vm.orientation === 'VERTICAL' ? 'slide-vertical' : 'slide-horizontal'
+    }
+  }, _vm._l(_vm.filterList, function (item, index) {
+    return _c('div', {
+      key: "child-" + (item.id || index),
+      ref: "childItem",
+      refInFor: true,
+      staticClass: "child",
+      class: [{
+        focus: _vm.isFocused && (_vm.hideItems && _vm.nested ? index === 0 : index === _vm.focusedIndex)
+      }, {
+        ready: _vm.ready
+      }]
+    }, [_c(_vm.child, _vm._b({
+      key: "nested-" + item.id,
       tag: "component",
       class: {
         disabled: _vm.disabledIndex.includes(index)
       },
       attrs: {
-        "id": "child" + (item.id || index),
-        "isFocused": _vm.isFocused && index === _vm.focusedIndex,
+        "id": "child-" + item.id,
+        "isFocused": _vm.isFocused && (_vm.hideItems && _vm.nested ? index === 0 : index === _vm.focusedIndex),
         "disabled": item.disabled || _vm.disabledIndex.includes(index)
       }
     }, 'component', item, false))], 1);
@@ -821,8 +839,8 @@ var __vue_staticRenderFns__$1 = [];
 
 var __vue_inject_styles__$1 = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-0b0d491a_0", {
-    source: ".focusableList[data-v-0b0d491a]{height:100%;width:100%}h3[data-v-0b0d491a]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-0b0d491a]{display:flex;transition:all .15s ease;position:relative}.child[data-v-0b0d491a]{display:flex;opacity:0;visibility:hidden;transition:opacity .15s ease}.show[data-v-0b0d491a]{opacity:1;visibility:visible}.vertical[data-v-0b0d491a]{flex-direction:column}.disabled[data-v-0b0d491a]{background:grey}",
+  inject("data-v-19c3b7e0_0", {
+    source: ".focusableList[data-v-19c3b7e0]{height:100%;width:100%}h3[data-v-19c3b7e0]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-19c3b7e0]{display:flex;position:relative}.child[data-v-19c3b7e0]{display:flex}.show[data-v-19c3b7e0]{opacity:1;visibility:visible}.vertical[data-v-19c3b7e0]{flex-direction:column}.disabled[data-v-19c3b7e0]{background:grey}.slide-vertical-enter[data-v-19c3b7e0],.slide-vertical-leave-to[data-v-19c3b7e0]{margin-bottom:-277px;transform:translateY(-100%);opacity:0}.slide-horizontal-enter-active[data-v-19c3b7e0],.slide-horizontal-leave-active[data-v-19c3b7e0]{position:relative;z-index:-1}.slide-horizontal-enter[data-v-19c3b7e0],.slide-horizontal-leave-to[data-v-19c3b7e0]{margin-right:-16vw;transform:translateX(-150%)}.ready[data-v-19c3b7e0]{transition:all .15s ease}",
     map: undefined,
     media: undefined
   });
@@ -830,10 +848,10 @@ var __vue_inject_styles__$1 = function __vue_inject_styles__(inject) {
 /* scoped */
 
 
-var __vue_scope_id__$1 = "data-v-0b0d491a";
+var __vue_scope_id__$1 = "data-v-19c3b7e0";
 /* module identifier */
 
-var __vue_module_identifier__$1 = "data-v-0b0d491a";
+var __vue_module_identifier__$1 = "data-v-19c3b7e0";
 /* functional template */
 
 var __vue_is_functional_template__$1 = false;

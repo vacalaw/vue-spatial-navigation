@@ -1,6 +1,6 @@
 <template>
   <button class="card" :style="{width:width}" @click="test" v-bind:class="{ focus: isFocused }">
-    <img :src="items" :style="{height:height}"/>
+    <img :src="items.card || items.background || items.thumb_url" :style="{height:height}"/>
   </button>
 </template>
 

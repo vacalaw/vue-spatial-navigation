@@ -4,22 +4,22 @@
   <List
     :child="child"
     :isFocused="selected"
-    :items="items"
-    :shouldScroll="shouldScroll"
-    :nested="true"
+    :items="content"
+    :displayItems="5"
     :hideItems="true"
+    :nested="true"
+    :shouldScroll="shouldScroll"
     :onSettled="onFocusHandler"
+    :onChildChange="childChage"
     orientation="VERTICAL"
   />
 </div>
-<!-- <div>
-</div> -->
 </template>
 
 <script>
 import List from "@/focusable/List";
 import Card from "@/examples/components/Card";
-import { carouselData, gridData } from "../mock/mock";
+import { carouselData, gridData, ContentApp } from "../mock/mock";
 export default {
   components: {
     List,
@@ -27,65 +27,46 @@ export default {
   computed:{
     selected(){
       return this.$parent._data.focusElement === 'home'
+    },
+    content(){
+      return ContentApp.smartTvAppVideos.map((item,index) => ({
+          id:`${item.channel_id}`,
+          shouldScroll: true,
+          title: `${item.category}`,
+          child: Card,
+          hideItems: true,
+          onSettled: this.onChildSettled,
+          displayItems:6,
+          nested:true,
+          defaultIndex: this.stateScroll[index || this.rowSelected],
+          onChildChange: this.nestedChildChange,
+          items: item.videos.map((item) => ({ items: item, id:item.id, width: '16vw'})),
+      }));
     }
   },
   data() {
     return {
-      items: [
-        {
-          shouldScroll: true,
-          title: 'Test1',
-          child: Card,
-          hideItems: true,
-          onSettled: this.onChildSettled,
-          displayItems:5,
-          items: gridData.map((item) => ({ items: item, width: '16vw'})),
-        },
-        {
-          shouldScroll: true,
-          title: 'Test2',
-          child: Card,
-          hideItems: true,
-          onSettled: this.onChildSettled,
-          displayItems:5,
-          items: gridData.map((item) => ({ items: item, width: '16vw'})),
-        },
-        {
-          shouldScroll: true,
-          title: 'Test3',
-          child: Card,
-          hideItems: true,
-          onSettled: this.onChildSettled,
-          displayItems:5,
-          items: gridData.map((item) => ({ items: item, width: '16vw'})),
-        },
-        {
-          shouldScroll: true,
-          title: 'Test4',
-          child: Card,
-          hideItems: true,
-          onSettled: this.onChildSettled,
-          displayItems:5,
-          items: gridData.map((item) => ({ items: item, width: '16vw'})),
-        },
-      ],
       child: List,
       shouldScroll: true,
+      rowSelected:0,
+      stateScroll:ContentApp.smartTvAppVideos.map(() => (-1)),
     };
   },
   methods:{
+    nestedChildChange(data){
+      this.stateScroll[this.rowSelected] = data.newIndex;
+    },
+    childChage(data){
+      this.rowSelected = data.newIndex;
+    },
     onFocusHandler(data){
       console.log('parent',data);
     },
     onChildSettled(data){
-      // console.log('Child',data);
       if(data == 'LEFT'){
         this.$parent._data.focusElement = 'menu'
       }
     }
-  },
-  mounted(){
-    // console.log(this.$parent._data.focusElement)
   }
 };
 </script>

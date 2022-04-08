@@ -12,7 +12,7 @@
 <script>
 import FocusableGrid from "@/focusable/Grid";
 import Card from "@/examples/components/Card";
-import { gridData } from "../mock/mock";
+import { ContentApp } from "../mock/mock";
 export default {
   props: ["shouldScroll"],
   components: {
@@ -25,7 +25,7 @@ export default {
   },
   data() {
     return {
-      items: gridData.map((item) => ({ items: item, id: Math.random().toString(), width:'100%' })),
+      items: ContentApp.smartTvAppVideos[3].videos.map((item) => ({ items: item, id: Math.random().toString(), width:'100%' })),
       Card: Card,
     };
   },

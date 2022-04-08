@@ -1,29 +1,47 @@
 <template>
 	<div class="focusableList">
 		<h3 v-if="title">{{ title }}</h3>
-		<div
+		<!-- <div
 			class="list"
-			:class="[{focused: nested},{vertical: orientation === 'VERTICAL' }]"
+			:class="[{vertical: orientation === 'VERTICAL' }]"
+			ref="list"
+			:style="style"
+		> -->
+		<transition-group
+			class="list"
+			:name="orientation === 'VERTICAL' ? 'slide-vertical' : 'slide-horizontal'"
+			:class="[{ vertical: orientation === 'VERTICAL' }]"
 			ref="list"
 			:style="style"
 		>
 			<div
 				class="child"
-				:class="[{show : showItem(index)} ,{ focus: isFocused && index === focusedIndex},{focused: index === focusedIndex}]"
+				:class="[
+					{
+						focus:
+							isFocused &&
+							(hideItems && nested ? index === 0 : index === focusedIndex),
+					},{ready: ready}
+				]"
 				ref="childItem"
-				v-for="(item, index) in items"
-				:key="index"
+				v-for="(item, index) in filterList"
+				:key="`child-${item.id || index}`"
 			>
 				<component
 					:is="child"
 					v-bind="item"
-					:id="`child${item.id || index}`"
-					:isFocused="isFocused && index === focusedIndex"
+					:id="`child-${item.id}`"
+					:key="`nested-${item.id}`"
+					:isFocused="
+						isFocused &&
+						(hideItems && nested ? index === 0 : index === focusedIndex)
+					"
 					:class="{ disabled: disabledIndex.includes(index) }"
 					:disabled="item.disabled || disabledIndex.includes(index)"
 				/>
 			</div>
-		</div>
+		</transition-group>
+		<!-- </div> -->
 	</div>
 </template>
 
@@ -106,15 +124,22 @@ export default {
 	},
 	computed: {
 		style() {
-			return (
-				(this.orientation === "VERTICAL" ? "top" : "left") + `: ${this.scrollAmount}px;`
-			);
+			return this.hideItems
+				? ""
+				: (this.orientation === "VERTICAL" ? "top" : "left") +
+						`: ${this.scrollAmount}px;`;
+		},
+		filterList() {
+			return this.items.filter((item, index) => this.showItem(item, index));
 		},
 	},
 	methods: {
-		showItem(index){
-			if(this.hideItems){
-				return index >= this.focusedIndex && index < (+(this.displayItems)+this.focusedIndex);
+		showItem(item, index) {
+			if (this.hideItems && this.nested) {
+				return (
+					index >= this.focusedIndex &&
+					index < +this.displayItems + this.focusedIndex
+				);
 			}
 			return true;
 		},
@@ -332,17 +357,13 @@ h3 {
 }
 .list {
 	display: flex;
-	transition: all 0.15s ease;
 	position: relative;
 }
 .child {
 	display: flex;
-	opacity: 0;
-	visibility: hidden;
-	transition: opacity 0.15s ease;
 }
 
-.show{
+.show {
 	opacity: 1;
 	visibility: visible;
 }
@@ -351,5 +372,24 @@ h3 {
 }
 .disabled {
 	background: grey;
+}
+
+.slide-vertical-enter, .slide-vertical-leave-to {
+	margin-bottom: -277px;
+	transform: translateY(-100%);
+	opacity: 0;
+}
+
+.slide-horizontal-enter-active,
+.slide-horizontal-leave-active {
+	position: relative;
+	z-index: -1;
+}
+.slide-horizontal-enter, .slide-horizontal-leave-to {
+	margin-right: -16vw;
+	transform: translateX(-150%);
+}
+.ready{
+	transition: all 0.15s ease;
 }
 </style>

@@ -541,13 +541,17 @@ var script$1 = {
 
   computed: {
     style() {
-      return (this.orientation === "VERTICAL" ? "top" : "left") + `: ${this.scrollAmount}px;`;
+      return this.hideItems ? "" : (this.orientation === "VERTICAL" ? "top" : "left") + `: ${this.scrollAmount}px;`;
+    },
+
+    filterList() {
+      return this.items.filter((item, index) => this.showItem(item, index));
     }
 
   },
   methods: {
-    showItem(index) {
-      if (this.hideItems) {
+    showItem(item, index) {
+      if (this.hideItems && this.nested) {
         return index >= this.focusedIndex && index < +this.displayItems + this.focusedIndex;
       }
 
@@ -774,40 +778,40 @@ var __vue_render__$1 = function () {
 
   return _c('div', {
     staticClass: "focusableList"
-  }, [_vm.title ? _c('h3', [_vm._v(_vm._s(_vm.title))]) : _vm._e(), _vm._v(" "), _c('div', {
+  }, [_vm.title ? _c('h3', [_vm._v(_vm._s(_vm.title))]) : _vm._e(), _vm._v(" "), _c('transition-group', {
     ref: "list",
     staticClass: "list",
     class: [{
-      focused: _vm.nested
-    }, {
       vertical: _vm.orientation === 'VERTICAL'
     }],
-    style: _vm.style
-  }, _vm._l(_vm.items, function (item, index) {
+    style: _vm.style,
+    attrs: {
+      "name": _vm.orientation === 'VERTICAL' ? 'slide-vertical' : 'slide-horizontal'
+    }
+  }, _vm._l(_vm.filterList, function (item, index) {
     return _c('div', {
-      key: index,
+      key: "child-" + (item.id || index),
       ref: "childItem",
       refInFor: true,
       staticClass: "child",
       class: [{
-        show: _vm.showItem(index)
+        focus: _vm.isFocused && (_vm.hideItems && _vm.nested ? index === 0 : index === _vm.focusedIndex)
       }, {
-        focus: _vm.isFocused && index === _vm.focusedIndex
-      }, {
-        focused: index === _vm.focusedIndex
+        ready: _vm.ready
       }]
     }, [_c(_vm.child, _vm._b({
+      key: "nested-" + item.id,
       tag: "component",
       class: {
         disabled: _vm.disabledIndex.includes(index)
       },
       attrs: {
-        "id": "child" + (item.id || index),
-        "isFocused": _vm.isFocused && index === _vm.focusedIndex,
+        "id": "child-" + item.id,
+        "isFocused": _vm.isFocused && (_vm.hideItems && _vm.nested ? index === 0 : index === _vm.focusedIndex),
         "disabled": item.disabled || _vm.disabledIndex.includes(index)
       }
     }, 'component', item, false))], 1);
-  }), 0)]);
+  }), 0)], 1);
 };
 
 var __vue_staticRenderFns__$1 = [];
@@ -815,8 +819,8 @@ var __vue_staticRenderFns__$1 = [];
 
 const __vue_inject_styles__$1 = function (inject) {
   if (!inject) return;
-  inject("data-v-0b0d491a_0", {
-    source: ".focusableList[data-v-0b0d491a]{height:100%;width:100%}h3[data-v-0b0d491a]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-0b0d491a]{display:flex;transition:all .15s ease;position:relative}.child[data-v-0b0d491a]{display:flex;opacity:0;visibility:hidden;transition:opacity .15s ease}.show[data-v-0b0d491a]{opacity:1;visibility:visible}.vertical[data-v-0b0d491a]{flex-direction:column}.disabled[data-v-0b0d491a]{background:grey}",
+  inject("data-v-19c3b7e0_0", {
+    source: ".focusableList[data-v-19c3b7e0]{height:100%;width:100%}h3[data-v-19c3b7e0]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-19c3b7e0]{display:flex;position:relative}.child[data-v-19c3b7e0]{display:flex}.show[data-v-19c3b7e0]{opacity:1;visibility:visible}.vertical[data-v-19c3b7e0]{flex-direction:column}.disabled[data-v-19c3b7e0]{background:grey}.slide-vertical-enter[data-v-19c3b7e0],.slide-vertical-leave-to[data-v-19c3b7e0]{margin-bottom:-277px;transform:translateY(-100%);opacity:0}.slide-horizontal-enter-active[data-v-19c3b7e0],.slide-horizontal-leave-active[data-v-19c3b7e0]{position:relative;z-index:-1}.slide-horizontal-enter[data-v-19c3b7e0],.slide-horizontal-leave-to[data-v-19c3b7e0]{margin-right:-16vw;transform:translateX(-150%)}.ready[data-v-19c3b7e0]{transition:all .15s ease}",
     map: undefined,
     media: undefined
   });
@@ -824,7 +828,7 @@ const __vue_inject_styles__$1 = function (inject) {
 /* scoped */
 
 
-const __vue_scope_id__$1 = "data-v-0b0d491a";
+const __vue_scope_id__$1 = "data-v-19c3b7e0";
 /* module identifier */
 
 const __vue_module_identifier__$1 = undefined;
