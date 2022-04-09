@@ -575,7 +575,7 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
   },
   computed: {
     style: function style() {
-      return this.hideItems ? "" : (this.orientation === "VERTICAL" ? "top" : "left") + ": ".concat(this.scrollAmount, "px;");
+      return (this.orientation === "VERTICAL" ? "top" : "left") + ": ".concat(this.scrollAmount, "px;") + ((this.orientation === "VERTICAL" ? "padding-top" : "padding-left") + ": ".concat(Math.abs(this.scrollAmount), "px;"));
     },
     filterList: function filterList() {
       var _this = this;
@@ -587,7 +587,7 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
   },
   methods: {
     showItem: function showItem(item, index) {
-      if (this.hideItems && this.nested) {
+      if (this.hideItems) {
         return index >= this.focusedIndex && index < +this.displayItems + this.focusedIndex;
       }
 
@@ -750,11 +750,11 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
     enableNavigation((_enableNavigation = {
       id: "list-".concat(this.id)
     }, _defineProperty(_enableNavigation, KEYSLR.REVERSE, function () {
-      if (_this2.orientation == "VERTICAL" && !_this2.nested) {
+      if (_this2.orientation == "VERTICAL" && !_this2.hideItems) {
         _this2.onSettledFunction(KEYSLR.REVERSE);
       }
     }), _defineProperty(_enableNavigation, KEYSLR.FORWARD, function () {
-      if (_this2.orientation == "VERTICAL" && !_this2.nested) {
+      if (_this2.orientation == "VERTICAL" && !_this2.hideItems) {
         _this2.onSettledFunction(KEYSLR.FORWARD);
       }
     }), _defineProperty(_enableNavigation, KEYS.REVERSE, function () {
@@ -778,7 +778,9 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
     }), _enableNavigation));
     focusHandler.on("RESET_FOCUS", this.resetFocus);
     focusHandler.on("SET_FOCUS", this.setExternalFocus);
-    this.ready = true;
+    setTimeout(function () {
+      _this2.ready = true;
+    }, 500);
   },
   destroyed: function destroyed() {
     disableNavigation("list-".concat(this.id));
@@ -797,37 +799,24 @@ var __vue_render__$1 = function __vue_render__() {
   var _c = _vm._self._c || _h;
 
   return _c('div', {
-    staticClass: "focusableList"
-  }, [_vm._ssrNode((_vm.title ? "<h3 data-v-19c3b7e0>" + _vm._ssrEscape(_vm._s(_vm.title)) + "</h3>" : "<!---->") + " "), _c('transition-group', {
-    ref: "list",
-    staticClass: "list",
-    class: [{
-      vertical: _vm.orientation === 'VERTICAL'
-    }],
-    style: _vm.style,
-    attrs: {
-      "name": _vm.orientation === 'VERTICAL' ? 'slide-vertical' : 'slide-horizontal'
+    staticClass: "focusableList",
+    class: {
+      ready: _vm.ready
     }
-  }, _vm._l(_vm.filterList, function (item, index) {
-    return _c('div', {
-      key: "child-" + (item.id || index),
-      ref: "childItem",
-      refInFor: true,
-      staticClass: "child",
-      class: [{
-        focus: _vm.isFocused && (_vm.hideItems && _vm.nested ? index === 0 : index === _vm.focusedIndex)
-      }, {
-        ready: _vm.ready
-      }]
-    }, [_c(_vm.child, _vm._b({
-      key: "nested-" + item.id,
+  }, [_vm._ssrNode((_vm.title ? "<h3 data-v-a3249c6c>" + _vm._ssrEscape(_vm._s(_vm.title)) + "</h3>" : "<!---->") + " "), _vm._ssrNode("<div" + _vm._ssrClass("list", [{
+    vertical: _vm.orientation === 'VERTICAL'
+  }]) + _vm._ssrStyle(null, _vm.style, null) + " data-v-a3249c6c>", "</div>", _vm._l(_vm.filterList, function (item, index) {
+    return _vm._ssrNode("<div" + _vm._ssrClass("child", [{
+      focus: _vm.isFocused && (_vm.hideItems ? index === 0 : index === _vm.focusedIndex)
+    }]) + " data-v-a3249c6c>", "</div>", [_c(_vm.child, _vm._b({
+      key: "nested-" + (item.id || index),
       tag: "component",
       class: {
         disabled: _vm.disabledIndex.includes(index)
       },
       attrs: {
-        "id": "child-" + item.id,
-        "isFocused": _vm.isFocused && (_vm.hideItems && _vm.nested ? index === 0 : index === _vm.focusedIndex),
+        "id": "nested-" + item.id,
+        "isFocused": _vm.isFocused && (_vm.hideItems ? index === 0 : index === _vm.focusedIndex),
         "disabled": item.disabled || _vm.disabledIndex.includes(index)
       }
     }, 'component', item, false))], 1);
@@ -839,8 +828,8 @@ var __vue_staticRenderFns__$1 = [];
 
 var __vue_inject_styles__$1 = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-19c3b7e0_0", {
-    source: ".focusableList[data-v-19c3b7e0]{height:100%;width:100%}h3[data-v-19c3b7e0]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-19c3b7e0]{display:flex;position:relative}.child[data-v-19c3b7e0]{display:flex}.show[data-v-19c3b7e0]{opacity:1;visibility:visible}.vertical[data-v-19c3b7e0]{flex-direction:column}.disabled[data-v-19c3b7e0]{background:grey}.slide-vertical-enter[data-v-19c3b7e0],.slide-vertical-leave-to[data-v-19c3b7e0]{margin-bottom:-277px;transform:translateY(-100%);opacity:0}.slide-horizontal-enter-active[data-v-19c3b7e0],.slide-horizontal-leave-active[data-v-19c3b7e0]{position:relative;z-index:-1}.slide-horizontal-enter[data-v-19c3b7e0],.slide-horizontal-leave-to[data-v-19c3b7e0]{margin-right:-16vw;transform:translateX(-150%)}.ready[data-v-19c3b7e0]{transition:all .15s ease}",
+  inject("data-v-a3249c6c_0", {
+    source: ".focusableList[data-v-a3249c6c]{height:100%;width:100%}h3[data-v-a3249c6c]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-a3249c6c]{display:flex;position:relative}.child[data-v-a3249c6c]{display:flex}.vertical[data-v-a3249c6c]{flex-direction:column}.disabled[data-v-a3249c6c]{background:grey}.ready>.list[data-v-a3249c6c]{transition:left .1s ease,top .1s ease}",
     map: undefined,
     media: undefined
   });
@@ -848,10 +837,10 @@ var __vue_inject_styles__$1 = function __vue_inject_styles__(inject) {
 /* scoped */
 
 
-var __vue_scope_id__$1 = "data-v-19c3b7e0";
+var __vue_scope_id__$1 = "data-v-a3249c6c";
 /* module identifier */
 
-var __vue_module_identifier__$1 = "data-v-19c3b7e0";
+var __vue_module_identifier__$1 = "data-v-a3249c6c";
 /* functional template */
 
 var __vue_is_functional_template__$1 = false;

@@ -2,12 +2,12 @@
 <div class="content">
 
   <List
+    id="ExanpleNested"
     :child="child"
     :isFocused="selected"
     :items="content"
     :displayItems="5"
     :hideItems="true"
-    :nested="true"
     :shouldScroll="shouldScroll"
     :onSettled="onFocusHandler"
     :onChildChange="childChage"
