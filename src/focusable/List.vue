@@ -360,6 +360,7 @@ h3 {
 .child.focus,
 .child.focus + .child,
 .child.focus + .child + .child,
+.nested-hide-items .child.focus + .child + .child,
 .nested-hide-items .child.focus + .child + .child + .child,
 .nested-hide-items .child.focus + .child + .child + .child + .child{
 	opacity: 1;
