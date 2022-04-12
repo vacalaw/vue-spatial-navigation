@@ -6,7 +6,7 @@
     :child="child"
     :isFocused="selected"
     :items="content"
-    :displayItems="5"
+    :displayItems="4"
     :hideItems="true"
     :shouldScroll="shouldScroll"
     :onSettled="onFocusHandler"
@@ -36,7 +36,7 @@ export default {
           child: Card,
           hideItems: true,
           onSettled: this.onChildSettled,
-          displayItems:6,
+          displayItems:5,
           nested:true,
           defaultIndex: this.stateScroll[index || this.rowSelected],
           onChildChange: this.nestedChildChange,

@@ -570,19 +570,13 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
     return {
       focusedIndex: -1,
       scrollAmount: 0,
-      ready: false
+      ready: false,
+      itemsList: this.hideItems ? this.items.slice(0, this.displayItems) : this.items
     };
   },
   computed: {
     style: function style() {
-      return (this.orientation === "VERTICAL" ? "top" : "left") + ": ".concat(this.scrollAmount, "px;") + ((this.orientation === "VERTICAL" ? "padding-top" : "padding-left") + ": ".concat(Math.abs(this.scrollAmount), "px;"));
-    },
-    filterList: function filterList() {
-      var _this = this;
-
-      return this.items.filter(function (item, index) {
-        return _this.showItem(item, index);
-      });
+      return (this.orientation === "VERTICAL" ? "transform: translateY" : "transform: translateX") + "(".concat(this.scrollAmount, "px);");
     }
   },
   methods: {
@@ -735,13 +729,21 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
       if (this.ready && this.onSettled) {
         this.onSettled(arg);
       }
+    },
+    appendItem: function appendItem() {
+      console.log('append child');
+
+      if (this.itemsList.length < this.items.length) {
+        this.itemsList.push(this.items[this.itemsList.length]);
+      } // itemsList:  this.items.slice(0,this.displayItems),
+
     }
   },
   updated: function updated() {
     this.handleFocusLost();
   },
   mounted: function mounted() {
-    var _this2 = this,
+    var _this = this,
         _enableNavigation;
 
     this.setInitialvalue();
@@ -750,36 +752,38 @@ var __vue_component__ = /*#__PURE__*/normalizeComponent({
     enableNavigation((_enableNavigation = {
       id: "list-".concat(this.id)
     }, _defineProperty(_enableNavigation, KEYSLR.REVERSE, function () {
-      if (_this2.orientation == "VERTICAL" && !_this2.hideItems) {
-        _this2.onSettledFunction(KEYSLR.REVERSE);
+      if (_this.orientation == "VERTICAL" && !_this.hideItems) {
+        _this.onSettledFunction(KEYSLR.REVERSE);
       }
     }), _defineProperty(_enableNavigation, KEYSLR.FORWARD, function () {
-      if (_this2.orientation == "VERTICAL" && !_this2.hideItems) {
-        _this2.onSettledFunction(KEYSLR.FORWARD);
+      if (_this.orientation == "VERTICAL" && !_this.hideItems) {
+        _this.onSettledFunction(KEYSLR.FORWARD);
       }
     }), _defineProperty(_enableNavigation, KEYS.REVERSE, function () {
-      if (_this2.isPrevItemPresent()) {
-        _this2.updateFocus("reverse");
+      if (_this.isPrevItemPresent()) {
+        _this.updateFocus("reverse");
 
-        _this2.updateScrollValue();
+        _this.updateScrollValue();
       } else {
-        _this2.onSettledFunction(KEYS.REVERSE);
+        _this.onSettledFunction(KEYS.REVERSE);
       }
     }), _defineProperty(_enableNavigation, KEYS.FORWARD, function () {
-      if (_this2.isNextItemPresent()) {
-        _this2.updateFocus();
+      if (_this.isNextItemPresent()) {
+        _this.updateFocus();
 
-        _this2.updateScrollValue();
+        _this.updateScrollValue();
+
+        _this.appendItem();
       } else {
-        _this2.onSettledFunction(KEYS.FORWARD);
+        _this.onSettledFunction(KEYS.FORWARD);
       }
     }), _defineProperty(_enableNavigation, "preCondition", function preCondition() {
-      return _this2.isFocused && !_this2.disabled;
+      return _this.isFocused && !_this.disabled;
     }), _enableNavigation));
     focusHandler.on("RESET_FOCUS", this.resetFocus);
     focusHandler.on("SET_FOCUS", this.setExternalFocus);
     setTimeout(function () {
-      _this2.ready = true;
+      _this.ready = true;
     }, 500);
   },
   destroyed: function destroyed() {
@@ -800,15 +804,19 @@ var __vue_render__$1 = function __vue_render__() {
 
   return _c('div', {
     staticClass: "focusableList",
-    class: {
+    class: [{
       ready: _vm.ready
-    }
-  }, [_vm._ssrNode((_vm.title ? "<h3 data-v-a3249c6c>" + _vm._ssrEscape(_vm._s(_vm.title)) + "</h3>" : "<!---->") + " "), _vm._ssrNode("<div" + _vm._ssrClass("list", [{
+    }, {
+      'nested-hide-items': _vm.hideItems && _vm.nested
+    }, {
+      'hide-items': _vm.hideItems && !_vm.nested
+    }]
+  }, [_vm._ssrNode((_vm.title ? "<h3 data-v-358e97c5>" + _vm._ssrEscape(_vm._s(_vm.title)) + "</h3>" : "<!---->") + " "), _vm._ssrNode("<div" + _vm._ssrClass("list", [{
     vertical: _vm.orientation === 'VERTICAL'
-  }]) + _vm._ssrStyle(null, _vm.style, null) + " data-v-a3249c6c>", "</div>", _vm._l(_vm.filterList, function (item, index) {
+  }]) + _vm._ssrStyle(null, _vm.style, null) + " data-v-358e97c5>", "</div>", _vm._l(_vm.itemsList, function (item, index) {
     return _vm._ssrNode("<div" + _vm._ssrClass("child", [{
-      focus: _vm.isFocused && (_vm.hideItems ? index === 0 : index === _vm.focusedIndex)
-    }]) + " data-v-a3249c6c>", "</div>", [_c(_vm.child, _vm._b({
+      focus: index === _vm.focusedIndex
+    }]) + " data-v-358e97c5>", "</div>", [_c(_vm.child, _vm._b({
       key: "nested-" + (item.id || index),
       tag: "component",
       class: {
@@ -816,7 +824,7 @@ var __vue_render__$1 = function __vue_render__() {
       },
       attrs: {
         "id": "nested-" + item.id,
-        "isFocused": _vm.isFocused && (_vm.hideItems ? index === 0 : index === _vm.focusedIndex),
+        "isFocused": _vm.isFocused && index === _vm.focusedIndex,
         "disabled": item.disabled || _vm.disabledIndex.includes(index)
       }
     }, 'component', item, false))], 1);
@@ -828,8 +836,8 @@ var __vue_staticRenderFns__$1 = [];
 
 var __vue_inject_styles__$1 = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-a3249c6c_0", {
-    source: ".focusableList[data-v-a3249c6c]{height:100%;width:100%}h3[data-v-a3249c6c]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-a3249c6c]{display:flex;position:relative}.child[data-v-a3249c6c]{display:flex}.vertical[data-v-a3249c6c]{flex-direction:column}.disabled[data-v-a3249c6c]{background:grey}.ready>.list[data-v-a3249c6c]{transition:left .1s ease,top .1s ease}",
+  inject("data-v-358e97c5_0", {
+    source: ".focusableList[data-v-358e97c5]{height:100%;width:100%}h3[data-v-358e97c5]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-358e97c5]{display:flex;position:relative}.child[data-v-358e97c5]{display:flex}.hide-items .child[data-v-358e97c5],.nested-hide-items .child[data-v-358e97c5]{opacity:0;visibility:hidden;transition:opacity .2s ease}.child.focus[data-v-358e97c5],.child.focus+.child[data-v-358e97c5],.child.focus+.child+.child[data-v-358e97c5],.child.focus+.child+.child+.child[data-v-358e97c5],.nested-hide-items .child.focus+.child+.child+.child+.child[data-v-358e97c5]{opacity:1;visibility:visible}.vertical[data-v-358e97c5]{flex-direction:column}.disabled[data-v-358e97c5]{background:grey}.ready>.list[data-v-358e97c5]{transition:transform .1s ease}",
     map: undefined,
     media: undefined
   });
@@ -837,10 +845,10 @@ var __vue_inject_styles__$1 = function __vue_inject_styles__(inject) {
 /* scoped */
 
 
-var __vue_scope_id__$1 = "data-v-a3249c6c";
+var __vue_scope_id__$1 = "data-v-358e97c5";
 /* module identifier */
 
-var __vue_module_identifier__$1 = "data-v-a3249c6c";
+var __vue_module_identifier__$1 = "data-v-358e97c5";
 /* functional template */
 
 var __vue_is_functional_template__$1 = false;

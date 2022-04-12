@@ -1,5 +1,5 @@
 <template>
-	<div class="focusableList" :class="{ready: ready}">
+	<div class="focusableList" :class="[{ready: ready},{'nested-hide-items': (hideItems && nested)},{'hide-items': (hideItems && !nested)}]">
 		<h3 v-if="title">{{ title }}</h3>
 		<div
 			class="list"
@@ -9,15 +9,9 @@
 		>
 			<div
 				class="child"
-				:class="[
-					{
-						focus:
-							isFocused &&
-							(hideItems ? index === 0 : index === focusedIndex),
-					}
-				]"
+				:class="[{focus: index === focusedIndex}]"
 				ref="childItem"
-				v-for="(item, index) in filterList"
+				v-for="(item, index) in itemsList"
 				:key="`child-${item.id || index}`"
 			>
 				<component
@@ -25,10 +19,7 @@
 					v-bind="item"
 					:id="`nested-${item.id}`"
 					:key="`nested-${item.id || index}`"
-					:isFocused="
-						isFocused &&
-						(hideItems ? index === 0 : index === focusedIndex)
-					"
+					:isFocused="isFocused && index === focusedIndex"
 					:class="{ disabled: disabledIndex.includes(index) }"
 					:disabled="item.disabled || disabledIndex.includes(index)"
 				/>
@@ -112,17 +103,14 @@ export default {
 			focusedIndex: -1,
 			scrollAmount: 0,
 			ready: false,
+			itemsList: this.hideItems ? this.items.slice(0,this.displayItems) : this.items,
 		};
 	},
 	computed: {
 		style() {
 			return (
-				((this.orientation === "VERTICAL" ? "top" : "left") + `: ${this.scrollAmount}px;`)+
-				((this.orientation === "VERTICAL" ? "padding-top" : "padding-left") + `: ${Math.abs(this.scrollAmount)}px;`)
+				((this.orientation === "VERTICAL" ? "transform: translateY" : "transform: translateX") + `(${this.scrollAmount}px);`)
 			);
-		},
-		filterList() {
-			return this.items.filter((item, index) => this.showItem(item, index));
 		},
 	},
 	methods: {
@@ -285,6 +273,13 @@ export default {
 				this.onSettled(arg);
 			}
 		},
+		appendItem(){
+			console.log('append child');
+			if(this.itemsList.length < this.items.length){
+				this.itemsList.push(this.items[this.itemsList.length]);
+			}
+			// itemsList:  this.items.slice(0,this.displayItems),
+		}
 	},
 	updated() {
 		this.handleFocusLost();
@@ -317,6 +312,7 @@ export default {
 				if (this.isNextItemPresent()) {
 					this.updateFocus();
 					this.updateScrollValue();
+					this.appendItem();
 				} else {
 					this.onSettledFunction(KEYS.FORWARD);
 				}
@@ -356,6 +352,19 @@ h3 {
 .child {
 	display: flex;
 }
+.hide-items .child, .nested-hide-items .child{
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.2s ease;
+}
+.child.focus,
+.child.focus + .child,
+.child.focus + .child + .child,
+.child.focus + .child + .child + .child,
+.nested-hide-items .child.focus + .child + .child + .child + .child{
+	opacity: 1;
+	visibility: visible;
+}
 .vertical {
 	flex-direction: column;
 }
@@ -363,6 +372,6 @@ h3 {
 	background: grey;
 }
 .ready > .list{
-	transition: left 0.1s ease, top 0.1s ease;
+	transition: transform 0.1s ease;
 }
 </style>
