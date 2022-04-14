@@ -274,11 +274,11 @@ export default {
 			}
 		},
 		appendItem(){
-			console.log('append child');
-			if(this.itemsList.length < this.items.length){
-				this.itemsList.push(this.items[this.itemsList.length]);
+			if(this.focusedIndex >= this.itemsList.length-(this.displayItems/1.5)){
+				if(this.itemsList.length < this.items.length){
+					this.itemsList.push(this.items[this.itemsList.length]);
+				}
 			}
-			// itemsList:  this.items.slice(0,this.displayItems),
 		}
 	},
 	updated() {

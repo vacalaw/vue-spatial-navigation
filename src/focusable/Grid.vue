@@ -1,21 +1,22 @@
 <template>
   <div class="focusableGrid">
-    <transition-group ref="grid" :class="{ focus: isFocused }" name="list" class="grid" tag="div">
+    <div ref="grid" :class="{ focus: isFocused }" class="grid" :style="style">
         <div
           class="child" 
           :style="columns"
           ref="childItem"
-          v-for="(item, index) in filteredItems"
+          v-for="(item, index) in itemsList"
           :key="item.id"
+          :class="{activeRow: showItem(index)}"
         >
           <component
             :is="child"
             v-bind="item"
             :id="`child${item.id || index}`"
-            :isFocused="isFocused && index === activeColumn"
+            :isFocused="isFocused && index === focusedIndex"
           />
         </div>
-    </transition-group>
+    </div>
   </div>
 </template>
 
@@ -67,6 +68,7 @@ export default {
       activeRow: 0,
       activeColumn: 0,
       width: 0,
+      itemsList: this.items.slice(0,(this.maxColumn*this.maxColumn)+this.maxColumn),
     };
   },
   computed: {
@@ -77,21 +79,13 @@ export default {
       }
     },
     style() {
-      return {
-        top: `${this.scrollAmount}px`,
-      };
+      return `transform: translateY(${this.scrollAmount}px)`;
     },
-    filteredItems(){
-			return this.items.filter((item,index)=> this.showItem(item, index));
-		},
   },
   methods: {
-    showItem(item, index) {
-			if(index >= this.activeRow * this.maxColumn && index <= this.focusedIndex + this.maxColumn * this.maxColumn - this.activeColumn + this.maxColumn - 1){
-				return item;
-			}
-			return false;
-		},
+    showItem(index){
+      return index >= this.activeRow * this.maxColumn && index <= this.focusedIndex + this.maxColumn * this.maxColumn - this.activeColumn + this.maxColumn - 1
+    },
     getScrollAmount: (el, negative) => {
       if (el) {
         let value = el.clientHeight;
@@ -166,6 +160,7 @@ export default {
 				if(element.deltaY < 0 || element.deltaY > 0){
 					if(element.deltaY > 0  && this.isNextRowPresent()){
 						this.updateRow();
+            this.appendItem();
 						this.updateScrollValue('negative');
 					} else if (element.deltaY < 0 && this.isPrevRowPresent()){
 						this.updateRow('reverse')
@@ -173,6 +168,12 @@ export default {
 					}
 				}
 			}
+		},
+    appendItem(){
+      if(this.itemsList.length < this.items.length){
+        const newItems = this.items.slice(this.items[this.itemsList.length], this.maxColumn);
+        this.itemsList.push(...newItems);
+      }
 		}
   },
   updated() {
@@ -208,6 +209,7 @@ export default {
         if (this.isNextRowPresent()) {
           this.updateRow();
           if (this.shouldScroll) this.updateScrollValue("negative");
+          this.appendItem()
         }else{
           this.onSettledFunction('DOWN');
         }
@@ -236,10 +238,22 @@ export default {
 	flex-wrap: wrap;
 	align-content: flex-start;
 	position: relative;
+  transition: transform 0.1s ease;
 }
 .child {
   display: flex;
   align-items: stretch;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+}
+h3{
+  color: #fff;
+  font-size: 20px;
+}
+.child.activeRow{
+  opacity: 1;
+  visibility: visible;
 }
 .list-enter-active, .list-leave-active {
   transition: all .15s ease;

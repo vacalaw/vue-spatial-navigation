@@ -25,7 +25,7 @@ export default {
   },
   data() {
     return {
-      items: ContentApp.smartTvAppVideos[3].videos.map((item) => ({ items: item, id: Math.random().toString(), width:'100%' })),
+      items: ContentApp.smartTvAppVideos[2].videos[0].content.map((item) => ({ items: item, width:'100%' })),
       Card: Card,
     };
   },
