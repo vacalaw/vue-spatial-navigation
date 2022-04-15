@@ -268,7 +268,7 @@ var disableNavigation = function disableNavigation(id) {
     appendItem: function appendItem() {
       var amount = this.items.length - this.itemsList.length;
       var pushAmount = amount > this.maxColumn ? this.maxColumn : amount;
-      var newItems = this.items.slice(this.items[this.itemsList.length], pushAmount);
+      var newItems = this.items.slice(this.itemsList.length, this.itemsList.length + pushAmount);
 
       if (this.itemsList.length < this.items.length) {
         var _this$itemsList;
@@ -460,10 +460,10 @@ var __vue_render__ = function __vue_render__() {
     staticClass: "focusableGrid"
   }, [_vm._ssrNode("<div" + _vm._ssrClass("grid", {
     focus: _vm.isFocused
-  }) + _vm._ssrStyle(null, _vm.style, null) + " data-v-3836b4ff>", "</div>", _vm._l(_vm.itemsList, function (item, index) {
+  }) + _vm._ssrStyle(null, _vm.style, null) + " data-v-16c3fa7a>", "</div>", _vm._l(_vm.itemsList, function (item, index) {
     return _vm._ssrNode("<div" + _vm._ssrClass("child", {
       activeRow: _vm.showItem(index)
-    }) + _vm._ssrStyle(null, _vm.columns, null) + " data-v-3836b4ff>", "</div>", [_c(_vm.child, _vm._b({
+    }) + _vm._ssrStyle(null, _vm.columns, null) + " data-v-16c3fa7a>", "</div>", [_c(_vm.child, _vm._b({
       tag: "component",
       attrs: {
         "id": "child" + (item.id || index),
@@ -478,8 +478,8 @@ var __vue_staticRenderFns__ = [];
 
 var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-3836b4ff_0", {
-    source: ".focusableGrid[data-v-3836b4ff]{width:100%;height:100%}.grid[data-v-3836b4ff]{display:flex;height:100%;flex-wrap:wrap;align-content:flex-start;position:relative;transition:transform .1s ease}.child[data-v-3836b4ff]{display:flex;align-items:stretch;opacity:0;visibility:hidden;transition:opacity .2s ease}h3[data-v-3836b4ff]{color:#fff;font-size:20px}.child.activeRow[data-v-3836b4ff]{opacity:1;visibility:visible}.list-enter-active[data-v-3836b4ff],.list-leave-active[data-v-3836b4ff]{transition:all .15s ease}.list-enter[data-v-3836b4ff],.list-leave-to[data-v-3836b4ff]{height:0!important;z-index:10;border-color:transparent}.list-leave-to .focus[data-v-3836b4ff]{border-color:transparent}",
+  inject("data-v-16c3fa7a_0", {
+    source: ".focusableGrid[data-v-16c3fa7a]{width:100%;height:100%}.grid[data-v-16c3fa7a]{display:flex;height:100%;flex-wrap:wrap;align-content:flex-start;position:relative;transition:transform .1s ease}.child[data-v-16c3fa7a]{display:flex;align-items:stretch;opacity:0;visibility:hidden;transition:opacity .2s ease}h3[data-v-16c3fa7a]{color:#fff;font-size:20px}.child.activeRow[data-v-16c3fa7a]{opacity:1;visibility:visible}.list-enter-active[data-v-16c3fa7a],.list-leave-active[data-v-16c3fa7a]{transition:all .15s ease}.list-enter[data-v-16c3fa7a],.list-leave-to[data-v-16c3fa7a]{height:0!important;z-index:10;border-color:transparent}.list-leave-to .focus[data-v-16c3fa7a]{border-color:transparent}",
     map: undefined,
     media: undefined
   });
@@ -487,10 +487,10 @@ var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
 /* scoped */
 
 
-var __vue_scope_id__ = "data-v-3836b4ff";
+var __vue_scope_id__ = "data-v-16c3fa7a";
 /* module identifier */
 
-var __vue_module_identifier__ = "data-v-3836b4ff";
+var __vue_module_identifier__ = "data-v-16c3fa7a";
 /* functional template */
 
 var __vue_is_functional_template__ = false;
