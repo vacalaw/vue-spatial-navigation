@@ -170,8 +170,10 @@ export default {
 			}
 		},
     appendItem(){
+      const amount = (this.items.length - this.itemsList.length);
+      const pushAmount = amount > this.maxColumn ? this.maxColumn : amount;
+      const newItems = this.items.slice(this.items[this.itemsList.length], pushAmount);
       if(this.itemsList.length < this.items.length){
-        const newItems = this.items.slice(this.items[this.itemsList.length], this.maxColumn);
         this.itemsList.push(...newItems);
       }
 		}

@@ -274,7 +274,7 @@ export default {
 			}
 		},
 		appendItem(){
-			if(this.focusedIndex >= this.itemsList.length-(this.displayItems/1.5)){
+			if(this.focusedIndex >= this.itemsList.length-(this.displayItems)){
 				if(this.itemsList.length < this.items.length){
 					this.itemsList.push(this.items[this.itemsList.length]);
 				}
