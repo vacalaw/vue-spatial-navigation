@@ -103,6 +103,7 @@ export default {
 			focusedIndex: -1,
 			scrollAmount: 0,
 			ready: false,
+			preventMove: false,
 			itemsList: this.hideItems ? this.items.slice(0,this.displayItems) : this.items,
 		};
 	},
@@ -229,6 +230,13 @@ export default {
 			} else {
 				this.focusedIndex = this.getValidNextIndex();
 			}
+			this.preventMoveFunction();
+		},
+		preventMoveFunction(){
+			this.preventMove = true;
+			setTimeout(()=>{
+				this.preventMove = false;
+			},300)
 		},
 		onChildChangeFunction(prevIndex, newIndex, item) {
 			if (this.ready && this.onChildChange) {
@@ -302,17 +310,21 @@ export default {
 			},
 			[KEYS.REVERSE]: () => {
 				if (this.isPrevItemPresent()) {
-					this.updateFocus("reverse");
-					this.updateScrollValue();
+					if(!this.preventMove){
+						this.updateFocus("reverse");
+						this.updateScrollValue();
+					}
 				} else {
 					this.onSettledFunction(KEYS.REVERSE);
 				}
 			},
 			[KEYS.FORWARD]: () => {
 				if (this.isNextItemPresent()) {
-					this.updateFocus();
-					this.updateScrollValue();
-					this.appendItem();
+					if(!this.preventMove){
+						this.updateFocus();
+						this.updateScrollValue();
+						this.appendItem();
+					}
 				} else {
 					this.onSettledFunction(KEYS.FORWARD);
 				}
@@ -373,6 +385,6 @@ h3 {
 	background: grey;
 }
 .ready > .list{
-	transition: transform 0.1s ease;
+	transition: transform 0.3s ease;
 }
 </style>

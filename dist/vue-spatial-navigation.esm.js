@@ -85,6 +85,7 @@ var script = {
       activeRow: 0,
       activeColumn: 0,
       width: 0,
+      preventMove: false,
       itemsList: this.items.slice(0, this.maxColumn * this.maxColumn + this.maxColumn)
     };
   },
@@ -93,7 +94,7 @@ var script = {
     columns() {
       return {
         width: `${100 / this.maxColumn}%`,
-        height: `${this.width / this.maxColumn / 16 * 9}px`
+        height: `${Math.round(this.width / this.maxColumn / 16 * 9)}px`
       };
     },
 
@@ -149,6 +150,15 @@ var script = {
         this.focusedIndex = this.items.length - 1;
         this.activeColumn = (this.items.length - 1) % this.maxColumn;
       }
+
+      this.preventMoveFunction();
+    },
+
+    preventMoveFunction() {
+      this.preventMove = true;
+      setTimeout(() => {
+        this.preventMove = false;
+      }, 300);
     },
 
     isFocusIndexOutOfBound() {
@@ -185,16 +195,14 @@ var script = {
     onMainScrollWeel(element) {
       element.preventDefault();
 
-      if (!this.isKeyPress) {
-        if (element.deltaY < 0 || element.deltaY > 0) {
-          if (element.deltaY > 0 && this.isNextRowPresent()) {
-            this.updateRow();
-            this.appendItem();
-            this.updateScrollValue('negative');
-          } else if (element.deltaY < 0 && this.isPrevRowPresent()) {
-            this.updateRow('reverse');
-            this.updateScrollValue();
-          }
+      if (element.deltaY < 0 || element.deltaY > 0) {
+        if (element.deltaY > 0 && this.isNextRowPresent()) {
+          this.updateRow();
+          this.appendItem();
+          this.updateScrollValue("negative");
+        } else if (element.deltaY < 0 && this.isPrevRowPresent()) {
+          this.updateRow("reverse");
+          this.updateScrollValue();
         }
       }
     },
@@ -223,31 +231,35 @@ var script = {
         if (this.isPrevColumnPresent()) {
           this.updateColumn("reverse");
         } else {
-          this.onSettledFunction('LEFT');
+          this.onSettledFunction("LEFT");
         }
       },
       RIGHT: () => {
         if (this.isNextColumnPresent()) {
           this.updateColumn();
         } else {
-          this.onSettledFunction('RIGHT');
+          this.onSettledFunction("RIGHT");
         }
       },
       UP: () => {
         if (this.isPrevRowPresent()) {
-          this.updateRow("reverse");
-          if (this.shouldScroll) this.updateScrollValue();
+          if (!this.preventMove) {
+            this.updateRow("reverse");
+            if (this.shouldScroll) this.updateScrollValue();
+          }
         } else {
-          this.onSettledFunction('UP');
+          this.onSettledFunction("UP");
         }
       },
       DOWN: () => {
         if (this.isNextRowPresent()) {
-          this.updateRow();
-          if (this.shouldScroll) this.updateScrollValue("negative");
-          this.appendItem();
+          if (!this.preventMove) {
+            this.updateRow();
+            if (this.shouldScroll) this.updateScrollValue("negative");
+            this.appendItem();
+          }
         } else {
-          this.onSettledFunction('DOWN');
+          this.onSettledFunction("DOWN");
         }
       },
       preCondition: () => this.isFocused && !this.disabled,
@@ -437,8 +449,8 @@ var __vue_staticRenderFns__ = [];
 
 const __vue_inject_styles__ = function (inject) {
   if (!inject) return;
-  inject("data-v-16c3fa7a_0", {
-    source: ".focusableGrid[data-v-16c3fa7a]{width:100%;height:100%}.grid[data-v-16c3fa7a]{display:flex;height:100%;flex-wrap:wrap;align-content:flex-start;position:relative;transition:transform .1s ease}.child[data-v-16c3fa7a]{display:flex;align-items:stretch;opacity:0;visibility:hidden;transition:opacity .2s ease}h3[data-v-16c3fa7a]{color:#fff;font-size:20px}.child.activeRow[data-v-16c3fa7a]{opacity:1;visibility:visible}.list-enter-active[data-v-16c3fa7a],.list-leave-active[data-v-16c3fa7a]{transition:all .15s ease}.list-enter[data-v-16c3fa7a],.list-leave-to[data-v-16c3fa7a]{height:0!important;z-index:10;border-color:transparent}.list-leave-to .focus[data-v-16c3fa7a]{border-color:transparent}",
+  inject("data-v-29cffa5a_0", {
+    source: ".focusableGrid[data-v-29cffa5a]{width:100%;height:100%}.grid[data-v-29cffa5a]{display:flex;height:100%;flex-wrap:wrap;align-content:flex-start;position:relative;transition:transform .3s ease}.child[data-v-29cffa5a]{display:flex;align-items:stretch;opacity:0;visibility:hidden;transition:opacity .2s ease}h3[data-v-29cffa5a]{color:#fff;font-size:20px}.child.activeRow[data-v-29cffa5a]{opacity:1;visibility:visible}.list-enter-active[data-v-29cffa5a],.list-leave-active[data-v-29cffa5a]{transition:all .15s ease}.list-enter[data-v-29cffa5a],.list-leave-to[data-v-29cffa5a]{height:0!important;z-index:10;border-color:transparent}.list-leave-to .focus[data-v-29cffa5a]{border-color:transparent}",
     map: undefined,
     media: undefined
   });
@@ -446,7 +458,7 @@ const __vue_inject_styles__ = function (inject) {
 /* scoped */
 
 
-const __vue_scope_id__ = "data-v-16c3fa7a";
+const __vue_scope_id__ = "data-v-29cffa5a";
 /* module identifier */
 
 const __vue_module_identifier__ = undefined;
@@ -539,6 +551,7 @@ var script$1 = {
       focusedIndex: -1,
       scrollAmount: 0,
       ready: false,
+      preventMove: false,
       itemsList: this.hideItems ? this.items.slice(0, this.displayItems) : this.items
     };
   },
@@ -665,6 +678,15 @@ var script$1 = {
       } else {
         this.focusedIndex = this.getValidNextIndex();
       }
+
+      this.preventMoveFunction();
+    },
+
+    preventMoveFunction() {
+      this.preventMove = true;
+      setTimeout(() => {
+        this.preventMove = false;
+      }, 300);
     },
 
     onChildChangeFunction(prevIndex, newIndex, item) {
@@ -744,17 +766,21 @@ var script$1 = {
       },
       [KEYS.REVERSE]: () => {
         if (this.isPrevItemPresent()) {
-          this.updateFocus("reverse");
-          this.updateScrollValue();
+          if (!this.preventMove) {
+            this.updateFocus("reverse");
+            this.updateScrollValue();
+          }
         } else {
           this.onSettledFunction(KEYS.REVERSE);
         }
       },
       [KEYS.FORWARD]: () => {
         if (this.isNextItemPresent()) {
-          this.updateFocus();
-          this.updateScrollValue();
-          this.appendItem();
+          if (!this.preventMove) {
+            this.updateFocus();
+            this.updateScrollValue();
+            this.appendItem();
+          }
         } else {
           this.onSettledFunction(KEYS.FORWARD);
         }
@@ -832,8 +858,8 @@ var __vue_staticRenderFns__$1 = [];
 
 const __vue_inject_styles__$1 = function (inject) {
   if (!inject) return;
-  inject("data-v-59d0e1c4_0", {
-    source: ".focusableList[data-v-59d0e1c4]{height:100%;width:100%}h3[data-v-59d0e1c4]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-59d0e1c4]{display:flex;position:relative}.child[data-v-59d0e1c4]{display:flex}.hide-items .child[data-v-59d0e1c4],.nested-hide-items .child[data-v-59d0e1c4]{opacity:0;visibility:hidden;transition:opacity .2s ease}.child.focus[data-v-59d0e1c4],.child.focus+.child[data-v-59d0e1c4],.child.focus+.child+.child[data-v-59d0e1c4],.nested-hide-items .child.focus+.child+.child[data-v-59d0e1c4],.nested-hide-items .child.focus+.child+.child+.child[data-v-59d0e1c4],.nested-hide-items .child.focus+.child+.child+.child+.child[data-v-59d0e1c4]{opacity:1;visibility:visible}.vertical[data-v-59d0e1c4]{flex-direction:column}.disabled[data-v-59d0e1c4]{background:grey}.ready>.list[data-v-59d0e1c4]{transition:transform .1s ease}",
+  inject("data-v-25aa29a6_0", {
+    source: ".focusableList[data-v-25aa29a6]{height:100%;width:100%}h3[data-v-25aa29a6]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-25aa29a6]{display:flex;position:relative}.child[data-v-25aa29a6]{display:flex}.hide-items .child[data-v-25aa29a6],.nested-hide-items .child[data-v-25aa29a6]{opacity:0;visibility:hidden;transition:opacity .2s ease}.child.focus[data-v-25aa29a6],.child.focus+.child[data-v-25aa29a6],.child.focus+.child+.child[data-v-25aa29a6],.nested-hide-items .child.focus+.child+.child[data-v-25aa29a6],.nested-hide-items .child.focus+.child+.child+.child[data-v-25aa29a6],.nested-hide-items .child.focus+.child+.child+.child+.child[data-v-25aa29a6]{opacity:1;visibility:visible}.vertical[data-v-25aa29a6]{flex-direction:column}.disabled[data-v-25aa29a6]{background:grey}.ready>.list[data-v-25aa29a6]{transition:transform .3s ease}",
     map: undefined,
     media: undefined
   });
@@ -841,7 +867,7 @@ const __vue_inject_styles__$1 = function (inject) {
 /* scoped */
 
 
-const __vue_scope_id__$1 = "data-v-59d0e1c4";
+const __vue_scope_id__$1 = "data-v-25aa29a6";
 /* module identifier */
 
 const __vue_module_identifier__$1 = undefined;
