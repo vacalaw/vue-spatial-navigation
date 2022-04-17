@@ -34,6 +34,10 @@ import { enableNavigation, disableNavigation, focusHandler } from "@/event-bus";
 export default {
 	name: "focusableList",
 	props: {
+		delay: {
+			type: Boolean,
+			default: true,
+		},
 		hideItems: {
 			type: Boolean,
 			default: false,
@@ -233,10 +237,12 @@ export default {
 			this.preventMoveFunction();
 		},
 		preventMoveFunction(){
-			this.preventMove = true;
-			setTimeout(()=>{
-				this.preventMove = false;
-			},300)
+			if(this.delay){
+				this.preventMove = true;
+				setTimeout(()=>{
+					this.preventMove = false;
+				},300)
+			}
 		},
 		onChildChangeFunction(prevIndex, newIndex, item) {
 			if (this.ready && this.onChildChange) {

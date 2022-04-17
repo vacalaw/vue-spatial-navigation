@@ -478,6 +478,10 @@ const __vue_component__ = /*#__PURE__*/normalizeComponent({
 var script$1 = {
   name: "focusableList",
   props: {
+    delay: {
+      type: Boolean,
+      default: true
+    },
     hideItems: {
       type: Boolean,
       default: false
@@ -683,10 +687,12 @@ var script$1 = {
     },
 
     preventMoveFunction() {
-      this.preventMove = true;
-      setTimeout(() => {
-        this.preventMove = false;
-      }, 300);
+      if (this.delay) {
+        this.preventMove = true;
+        setTimeout(() => {
+          this.preventMove = false;
+        }, 300);
+      }
     },
 
     onChildChangeFunction(prevIndex, newIndex, item) {
@@ -858,8 +864,8 @@ var __vue_staticRenderFns__$1 = [];
 
 const __vue_inject_styles__$1 = function (inject) {
   if (!inject) return;
-  inject("data-v-25aa29a6_0", {
-    source: ".focusableList[data-v-25aa29a6]{height:100%;width:100%}h3[data-v-25aa29a6]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-25aa29a6]{display:flex;position:relative}.child[data-v-25aa29a6]{display:flex}.hide-items .child[data-v-25aa29a6],.nested-hide-items .child[data-v-25aa29a6]{opacity:0;visibility:hidden;transition:opacity .2s ease}.child.focus[data-v-25aa29a6],.child.focus+.child[data-v-25aa29a6],.child.focus+.child+.child[data-v-25aa29a6],.nested-hide-items .child.focus+.child+.child[data-v-25aa29a6],.nested-hide-items .child.focus+.child+.child+.child[data-v-25aa29a6],.nested-hide-items .child.focus+.child+.child+.child+.child[data-v-25aa29a6]{opacity:1;visibility:visible}.vertical[data-v-25aa29a6]{flex-direction:column}.disabled[data-v-25aa29a6]{background:grey}.ready>.list[data-v-25aa29a6]{transition:transform .3s ease}",
+  inject("data-v-3c2961e2_0", {
+    source: ".focusableList[data-v-3c2961e2]{height:100%;width:100%}h3[data-v-3c2961e2]{color:#fff;text-align:left;margin:32px 0 16px;font-size:1.6vmax}.list[data-v-3c2961e2]{display:flex;position:relative}.child[data-v-3c2961e2]{display:flex}.hide-items .child[data-v-3c2961e2],.nested-hide-items .child[data-v-3c2961e2]{opacity:0;visibility:hidden;transition:opacity .2s ease}.child.focus[data-v-3c2961e2],.child.focus+.child[data-v-3c2961e2],.child.focus+.child+.child[data-v-3c2961e2],.nested-hide-items .child.focus+.child+.child[data-v-3c2961e2],.nested-hide-items .child.focus+.child+.child+.child[data-v-3c2961e2],.nested-hide-items .child.focus+.child+.child+.child+.child[data-v-3c2961e2]{opacity:1;visibility:visible}.vertical[data-v-3c2961e2]{flex-direction:column}.disabled[data-v-3c2961e2]{background:grey}.ready>.list[data-v-3c2961e2]{transition:transform .3s ease}",
     map: undefined,
     media: undefined
   });
@@ -867,7 +873,7 @@ const __vue_inject_styles__$1 = function (inject) {
 /* scoped */
 
 
-const __vue_scope_id__$1 = "data-v-25aa29a6";
+const __vue_scope_id__$1 = "data-v-3c2961e2";
 /* module identifier */
 
 const __vue_module_identifier__$1 = undefined;
