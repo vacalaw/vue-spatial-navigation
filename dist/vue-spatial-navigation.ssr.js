@@ -158,7 +158,11 @@ var disableNavigation = function disableNavigation(id) {
     },
     id: {
       //unique id to differentiate navigation
+      type: String,
       default: Math.random().toString()
+    },
+    poster: {
+      default: false
     }
   },
   data: function data() {
@@ -174,9 +178,10 @@ var disableNavigation = function disableNavigation(id) {
   },
   computed: {
     columns: function columns() {
+      var divider = this.poster ? this.width / this.maxColumn / 2 * 3 : this.width / this.maxColumn / 16 * 9;
       return {
         width: "".concat(100 / this.maxColumn, "%"),
-        height: "".concat(Math.round(this.width / this.maxColumn / 16 * 9), "px")
+        height: "".concat(Math.round(divider), "px")
       };
     },
     style: function style() {
@@ -473,10 +478,10 @@ var __vue_render__ = function __vue_render__() {
     staticClass: "focusableGrid"
   }, [_vm._ssrNode("<div" + _vm._ssrClass("grid", {
     focus: _vm.isFocused
-  }) + _vm._ssrStyle(null, _vm.style, null) + " data-v-29cffa5a>", "</div>", _vm._l(_vm.itemsList, function (item, index) {
+  }) + _vm._ssrStyle(null, _vm.style, null) + " data-v-39836745>", "</div>", _vm._l(_vm.itemsList, function (item, index) {
     return _vm._ssrNode("<div" + _vm._ssrClass("child", {
       activeRow: _vm.showItem(index)
-    }) + _vm._ssrStyle(null, _vm.columns, null) + " data-v-29cffa5a>", "</div>", [_c(_vm.child, _vm._b({
+    }) + _vm._ssrStyle(null, _vm.columns, null) + " data-v-39836745>", "</div>", [_c(_vm.child, _vm._b({
       tag: "component",
       attrs: {
         "id": "child" + (item.id || index),
@@ -491,8 +496,8 @@ var __vue_staticRenderFns__ = [];
 
 var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
   if (!inject) return;
-  inject("data-v-29cffa5a_0", {
-    source: ".focusableGrid[data-v-29cffa5a]{width:100%;height:100%}.grid[data-v-29cffa5a]{display:flex;height:100%;flex-wrap:wrap;align-content:flex-start;position:relative;transition:transform .3s ease}.child[data-v-29cffa5a]{display:flex;align-items:stretch;opacity:0;visibility:hidden;transition:opacity .2s ease}h3[data-v-29cffa5a]{color:#fff;font-size:20px}.child.activeRow[data-v-29cffa5a]{opacity:1;visibility:visible}.list-enter-active[data-v-29cffa5a],.list-leave-active[data-v-29cffa5a]{transition:all .15s ease}.list-enter[data-v-29cffa5a],.list-leave-to[data-v-29cffa5a]{height:0!important;z-index:10;border-color:transparent}.list-leave-to .focus[data-v-29cffa5a]{border-color:transparent}",
+  inject("data-v-39836745_0", {
+    source: ".focusableGrid[data-v-39836745]{width:100%;height:100%}.grid[data-v-39836745]{display:flex;height:100%;flex-wrap:wrap;align-content:flex-start;position:relative;transition:transform .3s ease}.child[data-v-39836745]{display:flex;align-items:stretch;opacity:0;visibility:hidden;transition:opacity .2s ease}h3[data-v-39836745]{color:#fff;font-size:20px}.child.activeRow[data-v-39836745]{opacity:1;visibility:visible}.list-enter-active[data-v-39836745],.list-leave-active[data-v-39836745]{transition:all .15s ease}.list-enter[data-v-39836745],.list-leave-to[data-v-39836745]{height:0!important;z-index:10;border-color:transparent}.list-leave-to .focus[data-v-39836745]{border-color:transparent}",
     map: undefined,
     media: undefined
   });
@@ -500,10 +505,10 @@ var __vue_inject_styles__ = function __vue_inject_styles__(inject) {
 /* scoped */
 
 
-var __vue_scope_id__ = "data-v-29cffa5a";
+var __vue_scope_id__ = "data-v-39836745";
 /* module identifier */
 
-var __vue_module_identifier__ = "data-v-29cffa5a";
+var __vue_module_identifier__ = "data-v-39836745";
 /* functional template */
 
 var __vue_is_functional_template__ = false;
